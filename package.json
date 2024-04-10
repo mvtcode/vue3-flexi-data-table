@@ -1,0 +1,49 @@
+{
+  "name": "vue3-flexi-data-table",
+  "private": true,
+  "version": "0.0.1",
+  "author": "tanmv",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/vue3-flexi-data-table.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue3-flexi-data-table.js",
+      "require": "./dist/vue3-flexi-data-table.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "rimraf dist",
+    "build": "vite build && vue-tsc --emitDeclarationOnly",
+    "prepare": "npm run build",
+    "types": "vue-tsc",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "vue": "^3.4.21",
+    "vue3-popper": "^1.5.0",
+    "vuedraggable": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/escape-html": "^1.0.4",
+    "@types/node": "^20.12.2",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "rimraf": "^5.0.5",
+    "sass": "^1.72.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.0.6"
+  },
+  "engines": {
+    "npm": ">=10.0.0",
+    "node": ">=18.0.0"
+  },
+  "engineStrict": true
+}
