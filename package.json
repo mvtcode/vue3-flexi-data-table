@@ -1,6 +1,6 @@
 {
   "name": "vue3-flexi-data-table",
-  "private": true,
+  "private": false,
   "version": "0.0.1",
   "author": "tanmv",
   "type": "module",
@@ -24,6 +24,17 @@
     "prepare": "npm run build",
     "types": "vue-tsc",
     "preview": "vite preview"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "dynamic table",
+    "flexi data",
+    "flexi table"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mvtcode/vue3-flexi-data-table"
   },
   "dependencies": {
     "escape-html": "^1.0.3",
