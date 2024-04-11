@@ -23,6 +23,8 @@ import { Column, VfField, VfType } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 
+import '@/assets/style.scss';
+
 interface Props {
   columns: Column[];
   templates: VfField[];
@@ -121,13 +123,13 @@ const getValue = computed(() => {
 
         const rowValue = row[fieldInfo.vfAcutalField as string];
         if(Array.isArray(rowValue)) {
-          const vArr = fieldInfo.templateShow ? rowValue.map((item: any) => render(fieldInfo.templateShow as string, {$item: item})).join('') : rowValue.join(', ');
-          values.push(escapeHtml(vArr));
+          const vArr = fieldInfo.templateShow ? rowValue.map((item: any) => render(fieldInfo.templateShow as string, {$item: escapeHtml(item)})).join('') : rowValue.join(', ');
+          values.push(vArr);
           continue;
         }
 
         const objectRow = flattenObject(row);
-        let value = objectRow[fieldInfo.vfAcutalField];
+        let value = objectRow[fieldInfo?.vfAcutalField || ''];
         if (fieldInfo?.enum && Object.keys(fieldInfo.enum).length > 0) {
           value = fieldInfo.enum[value] || value;
           value = escapeHtml(value);

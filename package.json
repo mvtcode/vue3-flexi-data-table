@@ -1,28 +1,28 @@
 {
   "name": "vue3-flexi-data-table",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "tanmv",
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "types": "./dist/index.d.ts",
+  "main": "./dist/vue3-flexi-data-table.umd.cjs",
   "module": "./dist/vue3-flexi-data-table.js",
   "exports": {
     ".": {
       "import": "./dist/vue3-flexi-data-table.js",
       "require": "./dist/vue3-flexi-data-table.umd.cjs"
     },
+    "./components/TableEditor": "./src/components/TableEditor.vue",
     "./style.css": "./dist/style.css"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/components/"
+  ],
   "scripts": {
     "dev": "vite",
     "prebuild": "rimraf dist",
-    "build": "vite build && vue-tsc --emitDeclarationOnly",
-    "prepare": "npm run build",
-    "types": "vue-tsc",
+    "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
   "keywords": [
@@ -36,11 +36,14 @@
     "type": "git",
     "url": "https://github.com/mvtcode/vue3-flexi-data-table"
   },
+  "peerDependencies": {
+    "vue": "^3.4.21"
+  },
   "dependencies": {
     "escape-html": "^1.0.3",
     "vue": "^3.4.21",
-    "vue3-popper": "^1.5.0",
-    "vuedraggable": "^4.1.0"
+    "vue-draggable-next": "^2.2.1",
+    "vue3-popper": "^1.5.0"
   },
   "devDependencies": {
     "@types/escape-html": "^1.0.4",
@@ -50,11 +53,11 @@
     "sass": "^1.72.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
+    "vite-plugin-dts": "^3.8.1",
     "vue-tsc": "^2.0.6"
   },
   "engines": {
     "npm": ">=10.0.0",
     "node": ">=18.0.0"
-  },
-  "engineStrict": true
+  }
 }

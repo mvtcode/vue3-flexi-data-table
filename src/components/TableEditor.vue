@@ -9,7 +9,7 @@
           </div>
         </div>
         <hr style="margin: 5px 0"/>
-        <draggable
+        <!-- <draggable
           tag="ul"
           v-model="columnsEdit"
           class="dragArea list-group custom-scroll"
@@ -71,6 +71,67 @@
               </div>
             </li>
           </template>
+        </draggable> -->
+        <draggable
+          tag="ul"
+          v-model="columnsEdit"
+          handle=".handle"
+          ghost-class="ghost"
+          :sort="true"
+          class="dragArea list-group custom-scroll"
+        >
+          <li v-for="(element, index) in columnsEdit" :key="index" class="list-group-item" :class="{'hover': element.isDrag}">
+            <div class="label align-items-center" @drop="e => onDrop(e, element)" @dragover="e => onDragover(e, element)" @dragleave="e => onDragleave(e, element)">
+              <div class="align-items-center">
+                <span class="handle">☰</span>
+
+                <Popper placement="right-start" arrow class="popper-wrapper">
+                  <button class="btn-more">⋯</button>
+                  <template #content>
+                    <div class="popover-action">
+                      <div>
+                        <button class="btn-more" :class="{active: (element.align || 'left') === 'left'}" @click="element.align = 'left'">
+                          <img :src="AlignLeftIcon" />
+                        </button>
+                        <button class="btn-more" :class="{active: element.align === 'center'}" @click="element.align = 'center'">
+                          <img :src="AlignCenterIcon" />
+                        </button>
+                        <button class="btn-more" :class="{active: element.align === 'right'}" @click="element.align = 'right'">
+                          <img :src="AlignRightIcon" />
+                        </button>
+                      </div>
+                      <div style="margin-top: 4px">
+                        <button class="btn-more" :class="{active: element.vAlign === 'top'}" @click="element.vAlign = 'top'">
+                          <img :src="VerticalAlignTopIcon" />
+                        </button>
+                        <button class="btn-more" :class="{active: (element.vAlign || 'middle') === 'middle'}" @click="element.vAlign = 'middle'">
+                          <img :src="VerticalAlignCenterIcon" />
+                        </button>
+                        <button class="btn-more" :class="{active: element.vAlign === 'bottom'}" @click="element.vAlign = 'bottom'">
+                          <img :src="VerticalAlignBottomIcon" />
+                        </button>
+                      </div>
+                    </div>
+                    <div></div>
+                  </template>
+                </Popper>
+                
+                <input class="input-title" type="text" v-model="element.title" placeholder="Column name"/>
+              </div>
+              <ul class="list-selected-field">
+                <li v-for="vfCode in element.fieldCodes" :key="vfCode">
+                  <img v-if="mapFieldInfo[vfCode]?.vfType === VfType.ICON" class="icon-selected":src="mapFieldInfo[vfCode]?.value" />
+                  <span v-else>{{ mapFieldInfo[vfCode]?.vfTitle }}</span>
+                </li>
+                <li v-show="!element.fieldCodes.length" class="no-data">Kéo field vào đây</li>
+              </ul>
+            </div>
+            <div>
+              <button class="btn btn-close" @click.stop="closeIndex(index)">
+                ✘
+              </button>
+            </div>
+          </li>
         </draggable>
       </div>
 
@@ -119,18 +180,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import draggable from "vuedraggable";
+import { VueDraggableNext as draggable } from "vue-draggable-next";
+import Popper from "vue3-popper";
 import { toJson } from '@/utils/parse';
 import { VfField, VariantsField, Column, VfType } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
-import Popper from "vue3-popper";
-
 import AlignLeftIcon from '@/assets/icons/align-left.svg';
 import AlignCenterIcon from '@/assets/icons/align-center.svg';
 import AlignRightIcon from '@/assets/icons/align-right.svg';
 import VerticalAlignTopIcon from '@/assets/icons/vertal-align-top.svg';
 import VerticalAlignCenterIcon from '@/assets/icons/vertal-align-center.svg';
 import VerticalAlignBottomIcon from '@/assets/icons/vertal-align-bottom.svg';
+import '@/assets/style.scss';
 
 interface Props {
   modelValue: Column[];
@@ -169,16 +230,17 @@ const listFields = computed<VariantsField[]>(() => {
   const list: VariantsField[] = [];
 
   for(const vfField of props.vfFields) {
-    if (mapField[vfField.vfAcutalField] === undefined) {
+    const vfAcutalField = vfField?.vfAcutalField || '';
+    if (mapField[vfAcutalField] === undefined) {
       list.push({
         title: vfField.vfActualFieldTitle || '',
-        field: vfField.vfAcutalField,
+        field: vfAcutalField,
         variants: [vfField],
       });
 
-      mapField[vfField.vfAcutalField] = list.length - 1;
+      mapField[vfAcutalField] = list.length - 1;
     } else {
-      list[mapField[vfField.vfAcutalField]].variants.push(vfField);
+      list[mapField[vfAcutalField]].variants.push(vfField);
     }
   }
 
@@ -452,5 +514,10 @@ ul.list-group {
       margin-left: 4px;
     }
   }
+}
+
+.popper-wrapper {
+  border: none !important;
+  margin: 0 1px !important;
 }
 </style>

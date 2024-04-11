@@ -1,4 +1,4 @@
-import DynamicTable from "./components/DynamicTable.vue";
+import DynamicTable from "@/components/DynamicTable.vue";
 import TableEditor from "./components/TableEditor.vue";
 import { VfField, Column, VfType } from "./interfaces/table";
 

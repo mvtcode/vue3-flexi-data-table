@@ -9,7 +9,7 @@ export interface VfField {
   vfTitle: string;
   vfCode: string;
   vfType: VfType;
-  vfAcutalField: string;
+  vfAcutalField?: string;
   vfActualFieldTitle?: string;
   vfRenderFunc?: (row: any, column: VfField, index: number) => string;
   enum?: {[key: string]: string | number};
