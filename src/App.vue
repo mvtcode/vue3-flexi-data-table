@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import DynamicTable from '/components/DynamicTable.vue';
+import DynamicTable from './components/DynamicTable.vue';
 import TableEditor from './components/TableEditor.vue';
 import { VfField, VfType, Column } from './interfaces/table';
 
