@@ -29,17 +29,71 @@ Use tool edit for build columns
 ```
 import { TableEditor } from 'vue3-flexi-data-table';
 ```
-## Interface
+## Datatype
 
-VfField, Column
+```javascript
+// field type
+enum VfType {
+  DATA = 'DATA', // use for get data of data table
+  SYMBOL = 'SYMBOL', // use for separator
+  ACTION = 'ACTION', // use for action button
+  ICON = 'ICON', // use for icon image
+}
 
-## Enum
+// model - interface of virtual field
+interface VfField {
+  vfTitle: string; // variants of field show, can same vfActualFieldTitle if have 1 variants
+  vfCode: string; // field code unique
+  vfType: VfType; // field type above
+  vfAcutalField?: string; // field of data table
+  vfActualFieldTitle?: string; // title of field
+  enum?: {[key: string]: string | number}; // enum value | eg: 1: "Nam", 0: "Nữ"
+  value?: string; // use for vfType = SYMBOL, ICON | Symbol value: space: '&nbsp;', newline: '<br/>',... | ICON = url of icon
+  templateShow?: string; // custom for return value, format `MSV: {{value}}`, with: {{value}} = vfAcutalField (use for basic data type) | when vfAcutalField has type = array format: `MSV: {{$item}}`, with {{$item}} value of each item value
+  vfRenderFunc?: (row: any, column: VfField, index: number) => string; // function custom return value for show, can return html, use for show custom format
+}
 
-VfType
+// model of column
+export interface Column {
+  title: string; // title of header
+  fieldCodes: string[]; // array of vfCode
+  width?: string; // todo
+  align?: 'left' | 'center' | 'right'; // align
+  vAlign?: 'top' | 'middle' | 'bottom'; // vertical align
+  cssHeader?: string; // todo
+  cssValue?: string; // todo
+  isDrag?: boolean; // use for edit table, if it is true => header, value are color red, maybe you don't need to care
+}
+
+```
 
 ## DynamicTable
 
+properties
+
+| Name    | Type | Require | default | Explain |
+| :---- | :---- | :---- | :---- | :---- |
+| fixed  | boolean | false  | false | Fixid header of table |
+| height  | number | when fixed is true  | 0 | show scroll when actual height > this value |
+
+
+Event
+
+| Name    | values | Explain |
+| :-------- | :------- | :--- |
+| onCta  | function(action: string, row: any, index: number) | action: fieldCodes of field has vfType = ACTION<br/> row: data full of row<br/> index: index of row |
+
+
 ## TableEditor
+
+Properties
+
+| Name    | Type | Require | default | Explain |
+| :---- | :---- | :---- | :---- | :---- |
+| v-model  | Column[] | true  | [] | columns of table |
+| vfFields  | VfField[] | true  | [] | fields define of data table |
+| actions  | VfField[] | false  | [] | define list actions |
+| icons  | VfField[] | false  | [] | define list icons |
 
 ## Usage
 
@@ -526,8 +580,10 @@ textarea {
 
 ## Author
 
-Email: [macvantan@gmail.com](mailto:macvantan@gmail.com)
+Tanmv
 
-Fb: [fb/mvt.hp.star](https://www.facebook.com/mvt.hp.star)
+Email: [tanmv@mpos.vn](mailto:tanmv@mpos.vn)
+
+Telegram: [@tanmac](https://t.me/tanmac)
 
 Skype: [trai_12a1](skype:trai_12a1?chat)
