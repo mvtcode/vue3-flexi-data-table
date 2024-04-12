@@ -75,13 +75,17 @@ properties
 | :---- | :---- | :---- | :---- | :---- |
 | fixed  | boolean | false  | false | Fixid header of table |
 | height  | number | when fixed is true  | 0 | show scroll when actual height > this value |
+| columns  | VfField[] | true  | [] | columns |
+| templates  | VfField[] | true  | [] | Includes:<br/>- `vfFields`<br/>- `actions`<br/>- `icons` |
 
 
 Event
 
+The event that will be received when you click on the field is `ACTION`
+
 | Name    | values | Explain |
 | :-------- | :------- | :--- |
-| onCta  | function(action: string, row: any, index: number) | action: fieldCodes of field has vfType = ACTION<br/> row: data full of row<br/> index: index of row |
+| onCta  | function(action: string, row: any, index: number) | - `action`: fieldCodes of field has vfType = ACTION<br/> - `row`: data full of row<br/> - `index`: index of row |
 
 
 ## TableEditor
@@ -574,7 +578,7 @@ textarea {
 </style>
 ```
 
-## Screen shoot
+## Screenshoot
 
 ![Screenshot docs](./screenshot.png)
 
