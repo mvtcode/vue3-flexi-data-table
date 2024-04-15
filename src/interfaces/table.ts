@@ -11,7 +11,7 @@ export interface VfField {
   vfType: VfType;
   vfAcutalField?: string;
   vfActualFieldTitle?: string;
-  vfRenderFunc?: (row: any, column: VfField, index: number) => string;
+  vfRenderFunc?: (row: any, column: VfField, index: number, calFunc: string) => string;
   enum?: {[key: string]: string | number};
   value?: string;
   templateShow?: string;

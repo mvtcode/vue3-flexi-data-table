@@ -50,7 +50,7 @@ interface VfField {
   enum?: {[key: string]: string | number}; // enum value | eg: 1: "Nam", 0: "Nữ"
   value?: string; // use for vfType = SYMBOL, ICON | Symbol value: space: '&nbsp;', newline: '<br/>',... | ICON = url of icon
   templateShow?: string; // custom for return value, format `MSV: {{value}}`, with: {{value}} = vfAcutalField (use for basic data type) | when vfAcutalField has type = array format: `MSV: {{$item}}`, with {{$item}} value of each item value
-  vfRenderFunc?: (row: any, column: VfField, index: number) => string; // function custom return value for show, can return html, use for show custom format
+  vfRenderFunc?: (row: any, column: VfField, index: number, calFunc: string) => string; // function custom return value for show, can return html, use for show custom format
 }
 
 // model of column

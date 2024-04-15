@@ -116,7 +116,7 @@ const getValue = computed(() => {
         }
 
         if (fieldInfo.vfRenderFunc) {
-          const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index);
+          const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
           values.push(vFun);
           continue;
         }

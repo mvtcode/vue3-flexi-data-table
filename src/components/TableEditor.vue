@@ -9,69 +9,6 @@
           </div>
         </div>
         <hr style="margin: 5px 0"/>
-        <!-- <draggable
-          tag="ul"
-          v-model="columnsEdit"
-          class="dragArea list-group custom-scroll"
-          item-key="alias"
-          group="people"
-          handle=".handle"
-        >
-          <template #item="{ element, index }">
-            <li class="list-group-item" :class="{'hover': element.isDrag}">
-              <div class="label align-items-center" @drop="e => onDrop(e, element)" @dragover="e => onDragover(e, element)" @dragleave="e => onDragleave(e, element)">
-                <div class="align-items-center">
-                  <span class="handle">☰</span>
-
-                  <Popper placement="right-start" arrow>
-                    <button class="btn-more">⋯</button>
-                    <template #content>
-                      <div class="popover-action">
-                        <div>
-                          <button class="btn-more" :class="{active: (element.align || 'left') === 'left'}" @click="element.align = 'left'">
-                            <img :src="AlignLeftIcon" />
-                          </button>
-                          <button class="btn-more" :class="{active: element.align === 'center'}" @click="element.align = 'center'">
-                            <img :src="AlignCenterIcon" />
-                          </button>
-                          <button class="btn-more" :class="{active: element.align === 'right'}" @click="element.align = 'right'">
-                            <img :src="AlignRightIcon" />
-                          </button>
-                        </div>
-                        <div style="margin-top: 4px">
-                          <button class="btn-more" :class="{active: element.vAlign === 'top'}" @click="element.vAlign = 'top'">
-                            <img :src="VerticalAlignTopIcon" />
-                          </button>
-                          <button class="btn-more" :class="{active: (element.vAlign || 'middle') === 'middle'}" @click="element.vAlign = 'middle'">
-                            <img :src="VerticalAlignCenterIcon" />
-                          </button>
-                          <button class="btn-more" :class="{active: element.vAlign === 'bottom'}" @click="element.vAlign = 'bottom'">
-                            <img :src="VerticalAlignBottomIcon" />
-                          </button>
-                        </div>
-                      </div>
-                      <div></div>
-                    </template>
-                  </Popper>
-                  
-                  <input class="input-title" type="text" v-model="element.title" placeholder="Column name"/>
-                </div>
-                <ul class="list-selected-field">
-                  <li v-for="vfCode in element.fieldCodes" :key="vfCode">
-                    <img v-if="mapFieldInfo[vfCode]?.vfType === VfType.ICON" class="icon-selected":src="mapFieldInfo[vfCode]?.value" />
-                    <span v-else>{{ mapFieldInfo[vfCode]?.vfTitle }}</span>
-                  </li>
-                  <li v-show="!element.fieldCodes.length" class="no-data">Kéo field vào đây</li>
-                </ul>
-              </div>
-              <div>
-                <button class="btn btn-close" @click.stop="closeIndex(index)">
-                  ✘
-                </button>
-              </div>
-            </li>
-          </template>
-        </draggable> -->
         <draggable
           tag="ul"
           v-model="columnsEdit"
@@ -145,7 +82,7 @@
             </li>
           </ul>
       </div>
-      <div class="edit-columns">
+      <div class="edit-columns etc-field custom-scroll">
         <div>
           <h5>Separator</h5>
           <hr style="margin: 5px 0"/>
@@ -313,6 +250,10 @@ const closeIndex = (index: number) => {
     width: calc(100% - 15px);
     min-height: calc(100% - 15px);
     height: 100%;
+
+    &.etc-field {
+      overflow: auto;
+    }
     
     h5 {
       margin: 0;
@@ -332,6 +273,7 @@ const closeIndex = (index: number) => {
       list-style: none;
       margin: 0;
       max-height: calc(100% - 33px);
+      overflow: auto;
       li {
         border-radius: 5px;
         white-space: nowrap;
