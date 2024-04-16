@@ -1,5 +1,5 @@
 <template>
-  <div class="box box-grid">
+  <div class="dynamic-table-edit box box-grid" :style="{height: `${height}px`}">
     <div class="grid-col-2">
       <div class="edit-columns">
         <div class="justify-content-space-between">
@@ -47,6 +47,16 @@
                         <button class="btn-more" :class="{active: element.vAlign === 'bottom'}" @click="element.vAlign = 'bottom'">
                           <img :src="VerticalAlignBottomIcon" />
                         </button>
+                      </div>
+
+                      <div style="margin-top: 4px" class="div-input">
+                        <label class="label">width:</label> <input type="text" v-model="element.width" placeholder="# px | %"/>
+                      </div>
+                      <div style="margin-top: 4px" class="div-input">
+                        <label class="label">min-width:</label> <input type="text" v-model="element.minWidth" placeholder="# px | %"/>
+                      </div>
+                      <div style="margin-top: 4px" class="div-input">
+                        <label class="label">max-width:</label> <input type="text" v-model="element.maxWidth" placeholder="# px | %"/>
                       </div>
                     </div>
                     <div></div>
@@ -130,16 +140,25 @@ import VerticalAlignCenterIcon from '@/assets/icons/vertal-align-center.svg';
 import VerticalAlignBottomIcon from '@/assets/icons/vertal-align-bottom.svg';
 import '@/assets/style.scss';
 
+// interface ColumnEdit extends Column {
+//   sWidth: string | number;
+//   sMinWidth: string | number;
+//   sMaxWidth: string | number;
+// }
+
 interface Props {
   modelValue: Column[];
   vfFields: VfField[];
   actions: VfField[];
   icons: VfField[];
+  height?: number;
 }
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  height: 390,
+});
 
 const emit = defineEmits<{
-  (e: "update:modelValue", ColumnEdit: Column[]): void;
+  (e: "update:modelValue", columnEdit: Column[]): void;
 }>();
 
 const columnsEdit = computed({
@@ -234,14 +253,19 @@ const closeIndex = (index: number) => {
 .box {
   &.box-grid {
     padding: 10px;
-    height: 390px;
+    // height: 390px;
   }
+}
+
+.dynamic-table {
+  
 }
 
 .grid-col-2 {
   display: grid;
   grid-template-columns: 3fr 2fr 1fr;
   height: calc(100% - 10px);
+  // height: 100%;
 
   .edit-columns {
     border: 1px solid #DDD;
@@ -461,5 +485,20 @@ ul.list-group {
 .popper-wrapper {
   border: none !important;
   margin: 0 1px !important;
+}
+
+.popover-action {
+  width: max-content;
+  .div-input {
+    display: flex;
+    .label {
+      width: 90px;
+      margin-right: 10px;
+    }
+    input[type="text"] {
+      width: 50px;
+      outline: none;
+    }
+  }
 }
 </style>

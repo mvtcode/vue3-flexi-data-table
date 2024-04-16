@@ -23,14 +23,20 @@ export interface VariantsField {
   variants: VfField[];
 }
 
+export interface DisplayTemplate {
+  title: string;
+  columns: Column[];
+}
+
 export interface Column {
   title: string;
   fieldCodes: string[];
   width?: string;
+  minWidth?: string;
+  maxWidth?: string;
   align?: 'left' | 'center' | 'right';
   vAlign?: 'top' | 'middle' | 'bottom';
   cssHeader?: string;
   cssValue?: string;
-
   isDrag?: boolean;
 }
