@@ -258,7 +258,7 @@ const closeIndex = (index: number) => {
 }
 
 .dynamic-table {
-  
+  font-size: 12px;
 }
 
 .grid-col-2 {
@@ -496,8 +496,10 @@ ul.list-group {
       margin-right: 10px;
     }
     input[type="text"] {
-      width: 50px;
+      width: 55px;
       outline: none;
+      border: 1px solid #AAA;
+      border-radius: 3px;
     }
   }
 }
