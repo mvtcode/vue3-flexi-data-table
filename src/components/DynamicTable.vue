@@ -8,7 +8,7 @@
       </thead>
       <tbody>
         <tr v-for="(row, index) in data" :key="index">
-          <td v-for="(column, index2) in columns" :key="index2" :class="{'drag-over': column.isDrag}" :style="{'text-align': (column.align || 'left'), 'vertical-align': (column.vAlign || 'middle')}">
+          <td v-for="(column, index2) in columns" :key="index2" :class="{'drag-over': column.isDrag}" :style="getStyleColumn(column)">
             <div class="td-line" v-html="getValue(row, column, index)" />
           </td>
         </tr>
@@ -84,6 +84,19 @@ const render = (template: string, values: {[key: string]: any}): string => {
     return (value !== undefined && value !== null) ? value : match;
   });
 }
+
+const getStyleColumn = computed(() => {
+  return (column: Column) => {
+    const style: {[key: string]: string} = {
+      'text-align': (column.align || 'left'),
+      'vertical-align': (column.vAlign || 'middle')
+    }
+    column.width && (style.width = column.width);
+    column.minWidth && (style['min-width'] = column.minWidth);
+    column.maxWidth && (style['max-width'] = column.maxWidth);
+    return style;
+  }
+});
 
 const mapFieldInfo = computed(() => {
   return [...props.templates, ...symbols].reduce((map: {[vfCode: string]: VfField}, field: VfField) => {

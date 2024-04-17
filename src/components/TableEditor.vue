@@ -5,7 +5,7 @@
         <div class="justify-content-space-between">
           <h5> Columns </h5>
           <div>
-            <button class="btn-plus" @click="onAddColumn">✚</button>
+            <button class="btn-plus" :disabled="disabled" @click="onAddColumn">✚</button>
           </div>
         </div>
         <hr style="margin: 5px 0"/>
@@ -14,7 +14,7 @@
           v-model="columnsEdit"
           handle=".handle"
           ghost-class="ghost"
-          :sort="true"
+          :sort="!disabled"
           class="dragArea list-group custom-scroll"
         >
           <li v-for="(element, index) in columnsEdit" :key="index" class="list-group-item" :class="{'hover': element.isDrag}">
@@ -23,7 +23,7 @@
                 <span class="handle">☰</span>
 
                 <Popper placement="right-start" arrow class="popper-wrapper">
-                  <button class="btn-more">⋯</button>
+                  <button class="btn-more" :disabled="disabled">⋯</button>
                   <template #content>
                     <div class="popover-action">
                       <div>
@@ -63,7 +63,7 @@
                   </template>
                 </Popper>
                 
-                <input class="input-title" type="text" v-model="element.title" placeholder="Column name"/>
+                <input :disabled="disabled" class="input-title" type="text" v-model="element.title" placeholder="Column name"/>
               </div>
               <ul class="list-selected-field">
                 <li v-for="vfCode in element.fieldCodes" :key="vfCode">
@@ -74,7 +74,7 @@
               </ul>
             </div>
             <div>
-              <button class="btn btn-close" @click.stop="closeIndex(index)">
+              <button class="btn btn-close" @click.stop="closeIndex(index)" :disabled="disabled">
                 ✘
               </button>
             </div>
@@ -152,8 +152,10 @@ interface Props {
   actions: VfField[];
   icons: VfField[];
   height?: number;
+  disabled?: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
+  disabled: false,
   height: 390,
 });
 
@@ -219,16 +221,25 @@ const onDragstart = (e: any, field: VfField) => {
 }
 
 const onDragover = (e: any, colum: Column,) => {
+  if (props.disabled) {
+    return false;
+  }
   e.preventDefault();
   colum.isDrag = true;
 }
 
 const onDragleave = (e: any, colum: Column,) => {
+  if (props.disabled) {
+    return false;
+  }
   e.preventDefault();
   colum.isDrag = false;
 }
 
 const onDrop = (e: any, colum: Column) => {
+  if (props.disabled) {
+    return false;
+  }
   e.preventDefault();
   const data = toJson(e.dataTransfer.getData("text"));
   if (data && data.vfCode) {
@@ -368,7 +379,7 @@ const closeIndex = (index: number) => {
 
 ul.list-group {
   padding-left: 0;
-  max-height: calc(100% - 33px);
+  height: calc(100% - 33px);
   overflow-y: auto;
   margin: 0;
   list-style: none;
