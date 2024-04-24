@@ -23,7 +23,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'minus',
     vfActualFieldTitle: 'Dấu trừ',
-    value: '&minus;',
+    value: '&hyphen;',
   },
   {
     vfTitle: '|',
@@ -31,7 +31,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'vertical',
     vfActualFieldTitle: 'Dấu dọc',
-    value: '|',
+    value: '&nbsp;|&nbsp;',
   },
   {
     vfTitle: ',',
@@ -39,7 +39,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'comma',
     vfActualFieldTitle: 'Dấu phẩy',
-    value: ',',
+    value: ',&nbsp;',
   },
   {
     vfTitle: '.',
@@ -47,7 +47,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'dot',
     vfActualFieldTitle: 'Dấu chấm',
-    value: ',',
+    value: '.&nbsp;',
   },
   {
     vfTitle: ';',
@@ -55,7 +55,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'semicolon',
     vfActualFieldTitle: 'Chấm phẩy',
-    value: ';',
+    value: ';&nbsp;',
   },
 ];
 

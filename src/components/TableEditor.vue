@@ -92,6 +92,7 @@
             </li>
           </ul>
       </div>
+
       <div class="edit-columns etc-field custom-scroll">
         <div>
           <h5>Separator</h5>
@@ -102,6 +103,7 @@
             </li>
           </ul>
         </div>
+
         <div style="margin-top: 10px">
           <h5>Actions</h5>
           <hr style="margin: 5px 0"/>
@@ -111,6 +113,7 @@
             </li>
           </ul>
         </div>
+        
         <div style="margin-top: 10px">
           <h5>Icons</h5>
           <hr style="margin: 5px 0"/>
