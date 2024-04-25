@@ -89,7 +89,7 @@ const getStyleColumn = computed(() => {
   return (column: Column) => {
     const style: {[key: string]: string} = {
       'text-align': (column.align || 'left'),
-      'vertical-align': (column.vAlign || 'middle')
+      'vertical-align': (column.vAlign || 'top')
     }
     column.width && (style.width = column.width);
     column.minWidth && (style['min-width'] = column.minWidth);

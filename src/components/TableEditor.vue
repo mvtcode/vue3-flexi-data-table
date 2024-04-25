@@ -38,10 +38,10 @@
                         </button>
                       </div>
                       <div style="margin-top: 4px">
-                        <button class="btn-more" :class="{active: element.vAlign === 'top'}" @click="element.vAlign = 'top'">
+                        <button class="btn-more" :class="{active: (element.vAlign || 'top') === 'top'}" @click="element.vAlign = 'top'">
                           <img :src="VerticalAlignTopIcon" />
                         </button>
-                        <button class="btn-more" :class="{active: (element.vAlign || 'middle') === 'middle'}" @click="element.vAlign = 'middle'">
+                        <button class="btn-more" :class="{active: element.vAlign === 'middle'}" @click="element.vAlign = 'middle'">
                           <img :src="VerticalAlignCenterIcon" />
                         </button>
                         <button class="btn-more" :class="{active: element.vAlign === 'bottom'}" @click="element.vAlign = 'bottom'">
