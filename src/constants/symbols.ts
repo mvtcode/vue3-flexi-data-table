@@ -31,7 +31,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'vertical',
     vfActualFieldTitle: 'Dấu dọc',
-    value: '&nbsp;|&nbsp;',
+    value: '|',
   },
   {
     vfTitle: ',',
@@ -39,7 +39,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'comma',
     vfActualFieldTitle: 'Dấu phẩy',
-    value: ',&nbsp;',
+    value: ',',
   },
   {
     vfTitle: '.',
@@ -47,7 +47,7 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'dot',
     vfActualFieldTitle: 'Dấu chấm',
-    value: '.&nbsp;',
+    value: '.',
   },
   {
     vfTitle: ';',
@@ -55,7 +55,39 @@ export const symbols: VfField[] = [
     vfType: VfType.SYMBOL,
     vfAcutalField: 'semicolon',
     vfActualFieldTitle: 'Chấm phẩy',
-    value: ';&nbsp;',
+    value: ';',
+  },
+  {
+    vfTitle: '[',
+    vfCode: 'openBracket',
+    vfType: VfType.SYMBOL,
+    vfAcutalField: 'openBracket',
+    vfActualFieldTitle: 'Mở ngoặc vuông',
+    value: '[',
+  },
+  {
+    vfTitle: ']',
+    vfCode: 'closeBracket',
+    vfType: VfType.SYMBOL,
+    vfAcutalField: 'closeBracket',
+    vfActualFieldTitle: 'Đóng ngoặc vuông',
+    value: ']',
+  },
+  {
+    vfTitle: '(',
+    vfCode: 'openRoundBracket',
+    vfType: VfType.SYMBOL,
+    vfAcutalField: 'openRoundBracket',
+    vfActualFieldTitle: 'Mở ngoặc tròn',
+    value: '(',
+  },
+  {
+    vfTitle: ')',
+    vfCode: 'closeRoundBracket',
+    vfType: VfType.SYMBOL,
+    vfAcutalField: 'closeRoundBracket',
+    vfActualFieldTitle: 'Đóng hoặc tròn',
+    value: ')',
   },
 ];
 
