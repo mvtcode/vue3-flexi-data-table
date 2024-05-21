@@ -17,6 +17,11 @@
   border-spacing: 0;
   // border: 1px solid;
 
+  .btn {
+    cursor: pointer;
+    color: #2320d3;
+  }
+
   thead {
     tr {
       th {
@@ -166,9 +171,4 @@
     border-radius: 5px;
     background-color: #00000033;
   }
-}
-
-.btn {
-  cursor: pointer;
-  color: #2320d3;
 }
