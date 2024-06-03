@@ -17,7 +17,7 @@
           :sort="!disabled"
           class="dragArea list-group custom-scroll"
         >
-          <li v-for="(element, index) in columnsEdit" :key="index" class="list-group-item" :class="{'hover': element.isDrag, active: activeIndex === index}" @click="activeIndex = index">
+          <li v-for="(element, index) in columnsEdit" :key="index" class="list-group-item" :class="{'hover': element.isDrag, active: activeIndex === index}" @click="!disabled && (activeIndex = index)">
             <div class="label align-items-center" @drop="e => onDrop(e, element, index)" @dragover="e => onDragover(e, element)" @dragleave="e => onDragleave(e, element)">
               <div class="align-items-center">
                 <span class="handle">☰</span>
@@ -292,7 +292,7 @@ const closeIndex = (index: number) => {
 }
 
 const onAddingField = (field: VfField) => {
-  console.log(field);
+  if (props.disabled) return;
   if (activeIndex.value >= 0) {
     const column = columnsEdit.value[activeIndex.value];
     column && column.fieldCodes.push(field.vfCode);
