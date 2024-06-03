@@ -17,8 +17,8 @@
           :sort="!disabled"
           class="dragArea list-group custom-scroll"
         >
-          <li v-for="(element, index) in columnsEdit" :key="index" class="list-group-item" :class="{'hover': element.isDrag}">
-            <div class="label align-items-center" @drop="e => onDrop(e, element)" @dragover="e => onDragover(e, element)" @dragleave="e => onDragleave(e, element)">
+          <li v-for="(element, index) in columnsEdit" :key="index" class="list-group-item" :class="{'hover': element.isDrag, active: activeIndex === index}" @click="activeIndex = index">
+            <div class="label align-items-center" @drop="e => onDrop(e, element, index)" @dragover="e => onDragover(e, element)" @dragleave="e => onDragleave(e, element)">
               <div class="align-items-center">
                 <span class="handle">☰</span>
 
@@ -59,7 +59,6 @@
                         <label class="label">max-width:</label> <input type="text" v-model="element.maxWidth" placeholder="# px | %"/>
                       </div>
                     </div>
-                    <div></div>
                   </template>
                 </Popper>
                 
@@ -85,12 +84,12 @@
       <div class="edit-columns">
         <h5>Fields</h5>
         <hr style="margin: 5px 0"/>
-          <ul class="list-field custom-scroll">
-            <li v-for="field in listFields" :key="field.field">
-              <div class="label">{{ field.title }}:</div>
-              <div class="item" draggable="true" @dragstart="e => onDragstart(e, vfield)" v-for="vfield in field.variants" :key="vfield.vfCode"> {{ vfield.vfTitle }} </div>
-            </li>
-          </ul>
+        <ul class="list-field custom-scroll">
+          <li v-for="field in listFields" :key="field.field">
+            <div class="label">{{ field.title }}:</div>
+            <div class="item" draggable="true" @dragstart="e => onDragstart(e, vfield)" v-for="vfield in field.variants" :key="vfield.vfCode" @dblclick="onAddingField(vfield)"> {{ vfield.vfTitle }} </div>
+          </li>
+        </ul>
       </div>
 
       <div class="edit-columns etc-field custom-scroll">
@@ -99,17 +98,38 @@
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in symbols" :key="field.vfAcutalField">
-              <div class="item" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              <div @dblclick="onAddingField(field)" class="item" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
+
+        <!-- <div style="margin-top: 10px">
+          <div class="justify-content-space-between">
+            <h5>Labels</h5>
+            <Popper placement="bottom-start" arrow class="popper-wrapper">
+              <button class="btn-plus" @click="">✚</button>
+              <template #content>
+                <div class="popover-action">
+                  <ul>
+                    <li>  </li>
+                  </ul>
+                </div>
+              </template>
+            </Popper>
+          </div>
+          <hr style="margin: 5px 0"/>
+          <ul class="list-field-label">
+            <li v-for="field in labels" :key="field.vfAcutalField">
+            </li>
+          </ul>
+        </div> -->
 
         <div style="margin-top: 10px">
           <h5>Actions</h5>
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in actions" :key="field.vfAcutalField">
-              <div class="item btn" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              <div @dblclick="onAddingField(field)" class="item btn" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
@@ -119,7 +139,7 @@
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in icons" :key="field.vfAcutalField">
-              <img :src="field.value" class="icon" draggable="true" @dragstart="e => onDragstart(e, field)"/>
+              <img @dblclick="onAddingField(field)" :src="field.value" class="icon" draggable="true" @dragstart="e => onDragstart(e, field)"/>
             </li>
           </ul>
         </div>
@@ -129,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { VueDraggableNext as draggable } from "vue-draggable-next";
 import Popper from "vue3-popper";
 import { toJson } from '@/utils/parse';
@@ -164,7 +184,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   (e: "update:modelValue", columnEdit: Column[]): void;
+  (e: "error", s: string): void;
 }>();
+
+// const labels = ref<>
 
 const columnsEdit = computed({
   get() {
@@ -185,6 +208,8 @@ const mapFieldInfo = computed(() => {
     return map;
   }, {});
 });
+
+const activeIndex = ref(-1);
 
 const listFields = computed<VariantsField[]>(() => {
   const mapField: {[field: string]: number} = {};
@@ -239,7 +264,7 @@ const onDragleave = (e: any, colum: Column,) => {
   colum.isDrag = false;
 }
 
-const onDrop = (e: any, colum: Column) => {
+const onDrop = (e: any, colum: Column, index: number) => {
   if (props.disabled) {
     return false;
   }
@@ -249,17 +274,31 @@ const onDrop = (e: any, colum: Column) => {
     colum.fieldCodes.push(data.vfCode);
   }
   colum.isDrag = false;
+
+  activeIndex.value = index;
 }
 
 const closeIndex = (index: number) => {
   const values = props.modelValue;
   const column = values[index];
   if (column.fieldCodes.length > 0) {
-    column.fieldCodes.length = 0;
+    // column.fieldCodes.length = 0;
+    column.fieldCodes.pop();
   } else {
     values.splice(index, 1);
+    activeIndex.value = -1;
   }
   emit('update:modelValue', values);
+}
+
+const onAddingField = (field: VfField) => {
+  console.log(field);
+  if (activeIndex.value >= 0) {
+    const column = columnsEdit.value[activeIndex.value];
+    column && column.fieldCodes.push(field.vfCode);
+  } else {
+    emit('error', 'Hãy chọn column để thêm');
+  }
 }
 </script>
 
@@ -402,6 +441,9 @@ ul.list-group {
     &.sortable-chosen {
       border-color: #F00;
       cursor: move;
+    }
+    &.active {
+      border-color: #94d53b;
     }
 
     .label {

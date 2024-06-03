@@ -1,8 +1,9 @@
 export enum VfType {
-  DATA = 'DATA',
-  SYMBOL = 'SYMBOL',
-  ACTION = 'ACTION',
-  ICON = 'ICON',
+  DATA = "DATA",
+  SYMBOL = "SYMBOL",
+  ACTION = "ACTION",
+  ICON = "ICON",
+  LABEL = "LABEL",
 }
 
 export interface VfField {
@@ -11,8 +12,13 @@ export interface VfField {
   vfType: VfType;
   vfAcutalField?: string;
   vfActualFieldTitle?: string;
-  vfRenderFunc?: (row: any, column: VfField, index: number, calFunc: string) => string;
-  enum?: {[key: string]: string | number};
+  vfRenderFunc?: (
+    row: any,
+    column: VfField,
+    index: number,
+    calFunc: string
+  ) => string;
+  enum?: { [key: string]: string | number };
   value?: string;
   templateShow?: string;
 }
@@ -34,8 +40,8 @@ export interface Column {
   width?: string;
   minWidth?: string;
   maxWidth?: string;
-  align?: 'left' | 'center' | 'right';
-  vAlign?: 'top' | 'middle' | 'bottom';
+  align?: "left" | "center" | "right";
+  vAlign?: "top" | "middle" | "bottom";
   cssHeader?: string;
   cssValue?: string;
   isDrag?: boolean;
