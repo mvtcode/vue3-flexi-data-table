@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^10.9.0",
+    "element-plus": "^2.8.5",
     "escape-html": "^1.0.3",
     "vue": "^3.4.21",
     "vue-draggable-next": "^2.2.1",

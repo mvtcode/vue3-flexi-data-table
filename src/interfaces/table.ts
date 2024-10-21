@@ -4,11 +4,12 @@ export enum VfType {
   ACTION = "ACTION",
   ICON = "ICON",
   LABEL = "LABEL",
+  TEXT = "TEXT",
 }
 
 export interface VfField {
   vfTitle: string;
-  vfCode: string;
+  vfCode: string ;
   vfType: VfType;
   vfAcutalField?: string;
   vfActualFieldTitle?: string;
@@ -21,6 +22,8 @@ export interface VfField {
   enum?: { [key: string]: string | number };
   value?: string;
   templateShow?: string;
+  color?: string;
+  fontStyle?: string[];
 }
 
 export interface VariantsField {
@@ -36,7 +39,7 @@ export interface DisplayTemplate {
 
 export interface Column {
   title: string;
-  fieldCodes: string[];
+  fieldCodes:string [];
   width?: string;
   minWidth?: string;
   maxWidth?: string;
@@ -45,4 +48,22 @@ export interface Column {
   cssHeader?: string;
   cssValue?: string;
   isDrag?: boolean;
+
 }
+
+export interface OptionLayout {
+  label: string;
+  value: any;
+  actions?: {
+    isClone?: boolean;
+    isEdit?: boolean;
+    isCopy?: boolean;
+    isDefault?: boolean;
+    isDelete?: boolean;
+  };
+}
+// export interface TextField extends VfField {
+//   content: string;
+//   style: string[];
+//   color: string;
+// }

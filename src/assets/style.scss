@@ -16,104 +16,16 @@
   border-collapse: collapse;
   border-spacing: 0;
   // border: 1px solid;
-
-  .btn {
-    cursor: pointer;
-    color: #2320d3;
-  }
-
-  thead {
-    tr {
-      th {
-        font-weight: 600;
-        border: 1px solid #DDD;
-        text-align: left;
-        padding: 6px 8px;
-        background: #f1f1f1;
-        min-height: 24px;
-      }
-    }
-  }
-
-  tbody {
-    tr {
-      td {
-        font-size: 1em;
-        border: 1px solid #DDD;
-        padding: 0 8px;
-
-        &.value-type-number {
-          text-align: right;
-        }
-
-        .td-line {
-          line-height: 20px;
-          width: 100%;
-          word-break: break-word;
-          .icon {
-            height: 12px;
-          }
-        }
-      }
-    }
-  }
-
-  tfoot {
-    tr {
-      td {
-        font-size: 1em;
-      }
-    }
-  }
+}
+.icon {
+  height: 15px;
+  padding-right: 5px;
+  padding-left: 5px; 
 }
 
-.wrapper-table { 
-  &.fixed {
-    position: relative;
-    width: 100%;
-    z-index: 1;
-    overflow: auto;
-    border: 1px solid #DDD;
-
-    .dynamic-table {
-      thead {
-        tr {
-          th {
-            position: -webkit-sticky;
-            position: sticky;
-            top: -1px;
-            border-bottom: 1px solid #DDD;
-            border-top: none;
-            z-index: 1;
-
-            &:first-child{
-              border-left: none;
-            }
-            &:last-child {
-              border-right: none;
-            }
-          }
-        }
-      }
-      tbody {
-        tr {
-          td:first-child {
-            border-left: none;
-          }
-
-          td:last-child {
-            border-right: none;
-          }
-
-          &:last-child {
-            td {
-              // border-bottom: none;
-            }
-          }
-        }
-      }
-    }
-  }
+.btn {
+  cursor: pointer;
+  color: #2320d3;
 }
 
 .w-100 {
@@ -131,7 +43,7 @@
 }
 
 .box {
-  border: 1px solid #DDD;
+  border: 1px solid #ddd;
   border-radius: 5px;
 }
 
@@ -157,18 +69,4 @@
   display: flex;
   align-items: center;
   justify-content: end;
-}
-
-.custom-scroll {
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-track {
-    border-radius: 5px;
-    background-color: rgba(161, 161, 161, 0.1);
-  }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background-color: #00000033;
-  }
 }
