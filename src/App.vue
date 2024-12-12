@@ -384,7 +384,7 @@ const dataEdit = computed({
     return JSON.stringify(data.value, null, 2);
   },
   set(value) {
-    data.value = JSON.parse(value);
+    data.value = (value && JSON.parse(value)) || [];
   }
 });
 

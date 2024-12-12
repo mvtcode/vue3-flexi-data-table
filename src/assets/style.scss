@@ -54,6 +54,13 @@
             height: 12px;
           }
         }
+
+        &.no-data {
+          text-align: center;
+          font-style: italic;
+          color: #999;
+          padding: 10px 0;
+        }
       }
     }
   }

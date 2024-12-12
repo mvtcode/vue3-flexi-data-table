@@ -7,9 +7,18 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, index) in data" :key="index">
-          <td v-for="(column, index2) in columns" :key="index2" :class="{'drag-over': column.isDrag}" :style="getStyleColumn(column)">
-            <div class="td-line" v-html="getValue(row, column, index)" />
+        <template v-if="(data?.length || 0) > 0">
+          <tr v-for="(row, index) in data" :key="index">
+            <td v-for="(column, index2) in columns" :key="index2" :class="{'drag-over': column.isDrag}" :style="getStyleColumn(column)">
+              <div class="td-line" v-html="getValue(row, column, index)" />
+            </td>
+          </tr>
+        </template>
+        <tr v-else>
+          <td :colspan="columns.length" class="no-data">
+            <slot name="no-data">
+              Không có dữ liệu
+            </slot>
           </td>
         </tr>
       </tbody>
@@ -28,7 +37,7 @@ import '@/assets/style.scss';
 interface Props {
   columns: Column[];
   templates: VfField[];
-  data: any[];
+  data: any[] | undefined;
   height: number;
   fixed: boolean;
 }
@@ -51,8 +60,8 @@ onMounted(() => {
   callFunction.value = `${prefixFunction}${Math.floor(Math.random() * 1e6)}`;
   const w: any = window;
   w[callFunction.value] = function (action: string, index: number) {
-    const row = props.data[index];
-    emit('onCta', action, row, index);
+    const row = props.data?[index]: undefined;
+    row && emit('onCta', action, row, index);
   }
 });
 
