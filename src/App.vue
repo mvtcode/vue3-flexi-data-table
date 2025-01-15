@@ -14,7 +14,27 @@
       fixed
       @onCta="onCta"
       @onText="onText"
-    />
+    >
+      <!-- Custom actions trong dialog -->
+      <template
+        #additional-actions="{ selected, canDelete, onDelete, onDefault }"
+      >
+        <el-button
+          v-if="canDelete"
+          size="small"
+          type="danger"
+          @click="onDelete"
+        >
+          <el-icon><Delete /></el-icon>
+          <span>Xoá</span>
+        </el-button>
+
+        <el-button size="small" type="primary" plain @click="onDefault">
+          <el-icon><SetUp /></el-icon>
+          <span>Mặc định</span>
+        </el-button>
+      </template>
+    </DynamicTables>
 
     <div class="grid">
       <div class="grid-item">
@@ -47,7 +67,6 @@
         </div>
       </div>
     </div>
-    
   </div>
 </template>
 
@@ -508,7 +527,7 @@ const columnsEdit = ref<Column[]>(
 const showText = ref<VfField[]>(textFields.value);
 const onText = (data: VfField[]) => {
   showText.value = data;
-}
+};
 const vfFieldsEdit = computed({
   get(): string {
     return JSON.stringify(vfFields.value, null, 2);

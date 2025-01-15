@@ -6,9 +6,7 @@
           <template #header>
             <el-row justify="space-between" style="padding: 0" align="middle">
               <el-col :span="12">
-                <slot name="columns"
-                  ><span class="font-bold"> Columns</span></slot
-                >
+                <slot name="columns"><span class="font-bold">Cột</span></slot>
               </el-col>
               <el-col :span="12" style="text-align: right">
                 <el-tooltip content="Thêm cột" placement="top">
@@ -238,7 +236,7 @@
                           :disabled="disabled"
                           size="small"
                           class="border-bottom-input"
-                          placeholder="Column name"
+                          placeholder="Tên cột"
                         />
                       </el-col>
                     </el-row>
@@ -304,7 +302,7 @@
       <el-col :xs="24" :sm="24" :md="12" :lg="7" :xl="8">
         <el-card>
           <template #header>
-            <span class="font-bold">Fields</span>
+            <span class="font-bold">Trường</span>
           </template>
           <el-scrollbar :height="height - 45">
             <ul class="list-field">
@@ -332,11 +330,11 @@
       <el-col :xs="24" :sm="24" :md="12" :lg="5" :xl="8">
         <el-card>
           <template #header>
-            <span class="font-bold">Extra</span>
+            <span class="font-bold">Tiện ích</span>
           </template>
           <el-scrollbar :height="height - 45">
             <el-collapse v-model="activeExtraNames" size="small" class="extra">
-              <el-collapse-item title="Separator" name="separator">
+              <el-collapse-item title="Dấu phân cách" name="separator">
                 <el-space wrap>
                   <el-tag
                     v-for="field in symbols"
@@ -351,7 +349,7 @@
                   </el-tag>
                 </el-space>
               </el-collapse-item>
-              <el-collapse-item title="Actions" name="actions">
+              <el-collapse-item title="Hành động" name="actions">
                 <el-space wrap>
                   <el-tag
                     v-for="field in actions"
@@ -366,7 +364,7 @@
                   </el-tag>
                 </el-space>
               </el-collapse-item>
-              <el-collapse-item title="Icons" name="icons">
+              <el-collapse-item title="Biểu tượng" name="icons">
                 <el-space wrap>
                   <el-tag
                     v-for="field in icons"
@@ -385,10 +383,10 @@
                   </el-tag>
                 </el-space>
               </el-collapse-item>
-              <el-collapse-item title="Text" name="text">
+              <el-collapse-item title="Chữ" name="text">
                 <template #title>
                   <el-space spacer="|">
-                    <span>Text</span>
+                    <span>Chữ</span>
                     <el-button
                       @click.stop="addNewTextField"
                       type="primary"
@@ -422,7 +420,11 @@
                         {{ field.vfTitle }}
                       </el-tag>
                     </template>
-                    <el-form size="small" label-width="45px" @change="emit('onText', textFields)">
+                    <el-form
+                      size="small"
+                      label-width="45px"
+                      @change="emit('onText', textFields)"
+                    >
                       <el-form-item label="Text:">
                         <el-input
                           v-model="field.vfTitle"
