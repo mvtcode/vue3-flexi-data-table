@@ -386,7 +386,7 @@
               <el-collapse-item title="Chữ" name="text">
                 <template #title>
                   <el-space spacer="|">
-                    <span>Chữ</span>
+                    <span>Nhãn</span>
                     <el-button
                       @click.stop="addNewTextField"
                       type="primary"
