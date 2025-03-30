@@ -103,26 +103,6 @@
           </ul>
         </div>
 
-        <!-- <div style="margin-top: 10px">
-          <div class="justify-content-space-between">
-            <h5>Labels</h5>
-            <Popper placement="bottom-start" arrow class="popper-wrapper">
-              <button class="btn-plus" @click="">✚</button>
-              <template #content>
-                <div class="popover-action">
-                  <ul>
-                    <li>  </li>
-                  </ul>
-                </div>
-              </template>
-            </Popper>
-          </div>
-          <hr style="margin: 5px 0"/>
-          <ul class="list-field-label">
-            <li v-for="field in labels" :key="field.vfAcutalField">
-            </li>
-          </ul>
-        </div> -->
 
         <div style="margin-top: 10px">
           <h5>Actions</h5>
@@ -130,6 +110,29 @@
           <ul class="list-field-symbol">
             <li v-for="field in actions" :key="field.vfAcutalField">
               <div @dblclick="onAddingField(field)" class="item btn" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+            </li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 10px">
+          <div class="justify-content-space-between">
+          <h5> Labels </h5>
+          <div>
+            <button class="btn-plus" :disabled="disabled" @click="onAddLabel">✚</button>
+            <!-- <Popper placement="left-start" arrow class="popper-wrapper">
+              <button class="btn-plus btn-more" :disabled="disabled" @click="onAddLabel">✚</button>
+              <template #content>
+                <div class="popover-action">
+                  more
+                </div>
+              </template>
+            </Popper> -->
+          </div>
+        </div>
+          <hr style="margin: 5px 0"/>
+          <ul class="list-field-symbol">
+            <li v-for="field in labelsTransform" :key="field.vfCode">
+              <div @click="onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
@@ -145,6 +148,11 @@
         </div>
       </div>
     </div>
+    
+    <PopupEditLabel
+      ref="popupEditLabelRef"
+      @save="handleSaveLabel"
+    />
   </div>
 </template>
 
@@ -153,7 +161,8 @@ import { computed, ref } from 'vue';
 import { VueDraggableNext as draggable } from "vue-draggable-next";
 import Popper from "vue3-popper";
 import { toJson } from '@/utils/parse';
-import { VfField, VariantsField, Column, VfType } from '@/interfaces/table';
+import { VfField, VariantsField, Column, VfType, LabelField } from '@/interfaces/table';
+import type { CSSProperties } from 'vue';
 import { symbols } from '@/constants/symbols';
 import AlignLeftIcon from '@/assets/icons/align-left.svg';
 import AlignCenterIcon from '@/assets/icons/align-center.svg';
@@ -162,15 +171,11 @@ import VerticalAlignTopIcon from '@/assets/icons/vertal-align-top.svg';
 import VerticalAlignCenterIcon from '@/assets/icons/vertal-align-center.svg';
 import VerticalAlignBottomIcon from '@/assets/icons/vertal-align-bottom.svg';
 import '@/assets/style.scss';
-
-// interface ColumnEdit extends Column {
-//   sWidth: string | number;
-//   sMinWidth: string | number;
-//   sMaxWidth: string | number;
-// }
+import PopupEditLabel from './PopupEditLabel.vue';
 
 interface Props {
   modelValue: Column[];
+  labels?: LabelField[];
   vfFields: VfField[];
   actions: VfField[];
   icons: VfField[];
@@ -180,14 +185,17 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   height: 390,
+  // labels: () => [],
+  actions: () => [],
+  icons: () => [],
+  vfFields: () => [],
 });
 
 const emit = defineEmits<{
   (e: "update:modelValue", columnEdit: Column[]): void;
+  (e: "update:labels", labels: LabelField[]): void;
   (e: "error", s: string): void;
 }>();
-
-// const labels = ref<>
 
 const columnsEdit = computed({
   get() {
@@ -198,8 +206,27 @@ const columnsEdit = computed({
   }
 })
 
+const labelsEdit = computed({
+  get() {
+    return props.labels || [];
+  },
+  set(values: LabelField[]) {
+    emit("update:labels", values);
+  }
+});
+
+const labelsTransform = computed<VfField[]>(() => {
+  return labelsEdit.value.map(label => ({
+    vfCode: label.code,
+    vfTitle: label.title,
+    vfType: VfType.LABEL,
+    vfAcutalField: label.code,
+    vfActualFieldTitle: label.title,
+  }));
+});
+
 const columnsTemplate = computed(() => {
-  return [...symbols, ...props.actions, ...props.icons, ...props.vfFields];
+  return [...symbols, ...props.actions, ...props.icons, ...props.vfFields, ...labelsTransform.value];
 });
 
 const mapFieldInfo = computed(() => {
@@ -300,6 +327,37 @@ const onAddingField = (field: VfField) => {
     emit('error', 'Hãy chọn column để thêm');
   }
 }
+
+// label
+const popupEditLabelRef = ref<InstanceType<typeof PopupEditLabel>>()
+
+const getStyleLabel = computed(() => (field: VfField): CSSProperties => {
+  const label = labelsEdit.value.find(label => label.code === field.vfCode)
+  return label?.style || {}
+})
+
+const onAddLabel = () => {
+  popupEditLabelRef.value?.show()
+}
+
+const onEditLabel = (field: VfField) => {
+  const label = labelsEdit.value.find(label => label.code === field.vfCode)
+  if (label) {
+    popupEditLabelRef.value?.show(label)
+  }
+}
+
+const handleSaveLabel = (data: LabelField) => {
+  console.log('handleSaveLabel', data)
+  const label = labelsEdit.value.find(label => label.code === data.code)
+  if (label) {
+    label.title = data.title
+    label.style = data.style
+  } else {
+    labelsEdit.value.push(data)
+  }
+  emit('update:labels', labelsEdit.value)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -343,6 +401,11 @@ const onAddingField = (field: VfField) => {
       color: rgb(35, 32, 211);
       border: 1px solid;
       border-radius: 5px;
+
+      &:disabled {
+        color: #999;
+        cursor: not-allowed;
+      }
     }
 
     ul.list-field {
@@ -529,6 +592,10 @@ ul.list-group {
 
       &.btn-close {
         color: #F00;
+        &:disabled {
+          color: #999;
+          cursor: not-allowed;
+        }
       }
     }
 

@@ -38,6 +38,7 @@
     <!-- Table content -->
     <DynamicTable
       :columns="selectedLayout?.columns || []"
+      :labels="selectedLayout?.labels || []"
       :templates="[...templates, ...actions, ...icons]"
       :data="data"
       :height="height"
@@ -57,9 +58,10 @@
         <div class="editor-body">
           <DynamicTable
             :columns="ColumnsEdit"
+            :labels="selectedLayoutEdit?.labels || []"
             :templates="[...templates, ...actions, ...icons]"
             :data="data"
-            :height="300"
+            :height="250"
             :fixed="true"
           />
           <!--actions-->
@@ -91,21 +93,15 @@
 
           <TableEditor
             v-model="ColumnsEdit"
+            v-model:labels="selectedLayoutEdit!.labels"
             :vf-fields="templates"
             :actions="actions"
             :icons="icons"
-            :height="300"
+            :height="450"
             :disabled="selectedLayoutEdit?.isSystem"
             @error="handleEditorError"
           />
         </div>
-
-        <!-- <div class="editor-footer">
-          <input v-model="layoutName" placeholder="Tên layout mới"/>
-          <button @click="saveLayout">Lưu layout</button>
-          <button @click="applyChanges">Áp dụng</button>
-          <button @click="showEditor = false">Hủy</button>
-        </div> -->
       </div>
     </div>
   </div>
@@ -180,8 +176,13 @@ const editingId = ref('');
 const selectedLayoutEdit = computed(() => {
   return layoutsEdit.value.find(layout => layout.id === editingId.value)
 });
-const ColumnsEdit = computed(() => {
-  return selectedLayoutEdit.value?.columns || []
+const ColumnsEdit = computed({
+  get() {
+    return selectedLayoutEdit.value?.columns || []
+  },
+  set(value: Column[]) {
+    selectedLayoutEdit.value!.columns = value;
+  }
 })
 
 const showEdit = () => {

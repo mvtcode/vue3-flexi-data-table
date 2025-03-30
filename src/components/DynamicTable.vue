@@ -27,8 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, onMounted, ref, onBeforeUnmount } from "vue";
-import { Column, VfField, VfType } from '@/interfaces/table';
+import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties } from "vue";
+import { Column, LabelField, VfField, VfType } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 
@@ -37,6 +37,7 @@ import '@/assets/style.scss';
 interface Props {
   columns: Column[];
   templates: VfField[];
+  labels: LabelField[];
   data: any[] | undefined;
   height?: number;
   fixed: boolean;
@@ -44,6 +45,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   columns: () => [],
   templates: () => [],
+  labels: () => [],
   data: () => [],
   fixed: false,
 });
@@ -110,12 +112,40 @@ const getStyleColumn = computed(() => {
   }
 });
 
-const mapFieldInfo = computed(() => {
-  return [...props.templates, ...symbols].reduce((map: {[vfCode: string]: VfField}, field: VfField) => {
+const mapFieldInfo = computed<{[code: string]: VfField}>(() => {
+  return [
+    ...props.templates,
+    ...props.labels.map((label: LabelField) => {
+      return {
+        vfTitle: label.title,
+        vfCode: label.code,
+        vfType: VfType.LABEL,
+        meta: label.style
+      } as VfField
+    }),
+    ...symbols
+  ].reduce((map: {[vfCode: string]: VfField}, field: VfField) => {
     map[field.vfCode] = field;
     return map;
   }, {});
 });
+
+const getStyleLabel = computed(() => (field: VfField): string => {
+  const label = props.labels.find(label => label.code === field.vfCode)
+  const style: CSSProperties = label?.style || {}
+  const styleEntries = Object.entries(style).map(([key, value]) => {
+    // Chuyển đổi từ camelCase sang kebab-case
+    const cssKey = key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+    return `${cssKey}: ${value}`;
+  })
+  
+  if (style.backgroundColor && style.backgroundColor !== 'transparent') {
+    styleEntries.push('padding: 0 3px');
+    styleEntries.push('border-radius: 3px');
+  }
+
+  return styleEntries.join(';');
+})
 
 const getValue = computed(() => {
   return (row: any, column: Column, index: number) => {
@@ -123,48 +153,54 @@ const getValue = computed(() => {
     for(const vfCode of column.fieldCodes) {
       const fieldInfo = mapFieldInfo.value[vfCode];
       if (fieldInfo) {
-        if (fieldInfo.vfType === VfType.SYMBOL) {
-          values.push(fieldInfo?.value || '');
-          continue;
-        }
+        switch (fieldInfo.vfType) {
+          case VfType.SYMBOL:
+            values.push(fieldInfo?.value || '');
+            break;
 
-        if (fieldInfo.vfType === VfType.ACTION) {
-          const value = `<span class="btn btn-${fieldInfo.vfAcutalField}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${fieldInfo?.vfTitle || ''}</span>`;
-          values.push(value);
-          continue;
-        }
+          case VfType.ACTION:
+            const actionValue = `<span class="btn btn-${fieldInfo.vfAcutalField}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${fieldInfo?.vfTitle || ''}</span>`;
+            values.push(actionValue);
+            break;
 
-        if (fieldInfo.vfType === VfType.ICON) {
-          const value = `<img class="icon" src="${fieldInfo.value}"/>`;
-          values.push(value);
-          continue;
-        }
+          case VfType.ICON:
+            const iconValue = `<img class="icon" src="${fieldInfo.value}"/>`;
+            values.push(iconValue);
+            break;
 
-        if (fieldInfo.vfRenderFunc) {
-          const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
-          values.push(vFun);
-          continue;
-        }
+          case VfType.LABEL:
+            const labelValue = `<span style="${getStyleLabel.value(fieldInfo)}">${fieldInfo.vfTitle}</span>`;
+            values.push(labelValue);
+            break;
 
-        const rowValue = row[fieldInfo.vfAcutalField as string];
-        if(Array.isArray(rowValue)) {
-          const vArr = fieldInfo.templateShow ? rowValue.map((item: any) => render(fieldInfo.templateShow as string, {$item: escapeHtml(item)})).join('') : rowValue.join(', ');
-          values.push(vArr);
-          continue;
-        }
+          default:
+            if (fieldInfo.vfRenderFunc) {
+              const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
+              values.push(vFun);
+              break;
+            }
 
-        const objectRow = flattenObject(row);
-        let value = objectRow[fieldInfo?.vfAcutalField || ''];
-        if (fieldInfo?.enum && Object.keys(fieldInfo.enum).length > 0) {
-          value = fieldInfo.enum[value] || value;
-          value = escapeHtml(value);
-        }
+            const rowValue = row[fieldInfo.vfAcutalField as string];
+            if(Array.isArray(rowValue)) {
+              const vArr = fieldInfo.templateShow ? rowValue.map((item: any) => render(fieldInfo.templateShow as string, {$item: escapeHtml(item)})).join('') : rowValue.join(', ');
+              values.push(vArr);
+              break;
+            }
 
-        if (fieldInfo?.templateShow) {
-          value = render(fieldInfo?.templateShow, {value: escapeHtml(value)});
-        }
+            const objectRow = flattenObject(row);
+            let value = objectRow[fieldInfo?.vfAcutalField || ''];
+            if (fieldInfo?.enum && Object.keys(fieldInfo.enum).length > 0) {
+              value = fieldInfo.enum[value] || value;
+              value = escapeHtml(value);
+            }
 
-        values.push(value);
+            if (fieldInfo?.templateShow) {
+              value = render(fieldInfo?.templateShow, {value: escapeHtml(value)});
+            }
+
+            values.push(value);
+            break;
+        }
       }
     }
     return values.join('');

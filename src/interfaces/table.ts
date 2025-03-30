@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'vue';
+
 export enum VfType {
   DATA = "DATA",
   SYMBOL = "SYMBOL",
@@ -21,6 +23,7 @@ export interface VfField {
   enum?: { [key: string]: string | number };
   value?: string;
   templateShow?: string;
+  meta?: {[key: string]: any}
 }
 
 export interface VariantsField {
@@ -29,17 +32,19 @@ export interface VariantsField {
   variants: VfField[];
 }
 
+export interface LabelField {
+  title: string;
+  code: string;
+  style?: CSSProperties;
+}
+
 export interface LayoutTemplate {
   title: string;
   id: string;
   isSystem: boolean;
   isDefault?: boolean;
   columns: Column[];
-  labels?: {
-    title: string;
-    code: string;
-    style?: string;
-  }[];
+  labels?: LabelField[];
 }
 
 export interface Column {

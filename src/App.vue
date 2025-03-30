@@ -400,7 +400,16 @@ const defaultLayouts: LayoutTemplate[] = [
       },
       { title: "Giới tính", fieldCodes: ["gender2", "newline", "age"] },
       { title: "Trạng thái", fieldCodes: ["star", "space", "status"] },
+      { title: "Text", fieldCodes: ["text-01"] },
     ],
+    labels: [{
+      code: 'text-01',
+      title: 'Ví dụ:',
+      style: {
+        'font-size': '13px',
+        'color': 'red'
+      }
+    }]
   },
 ];
 
