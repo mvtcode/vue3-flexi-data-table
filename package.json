@@ -1,7 +1,7 @@
 {
   "name": "vue3-flexi-data-table",
   "private": false,
-  "version": "0.1.18",
+  "version": "0.1.19",
   "author": "tanmv",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -42,6 +42,7 @@
   "dependencies": {
     "@vueuse/core": "^10.9.0",
     "escape-html": "^1.0.3",
+    "uuid": "^11.1.0",
     "vue": "^3.4.21",
     "vue-draggable-next": "^2.2.1",
     "vue3-popper": "^1.5.0"

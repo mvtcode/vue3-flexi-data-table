@@ -38,10 +38,13 @@ interface Props {
   columns: Column[];
   templates: VfField[];
   data: any[] | undefined;
-  height: number;
+  height?: number;
   fixed: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
+  columns: () => [],
+  templates: () => [],
+  data: () => [],
   fixed: false,
 });
 

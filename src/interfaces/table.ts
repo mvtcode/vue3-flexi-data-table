@@ -29,9 +29,17 @@ export interface VariantsField {
   variants: VfField[];
 }
 
-export interface DisplayTemplate {
+export interface LayoutTemplate {
   title: string;
+  id: string;
+  isSystem: boolean;
+  isDefault?: boolean;
   columns: Column[];
+  labels?: {
+    title: string;
+    code: string;
+    style?: string;
+  }[];
 }
 
 export interface Column {
