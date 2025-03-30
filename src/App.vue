@@ -45,8 +45,8 @@ const vfFields: VfField[] = [
     vfAcutalField: "id",
     vfActualFieldTitle: "Mã SV",
     templateShow: "MSV: {{value}}",
-    vfRenderFunc: (row: any) => {
-      return `ID: <strong style="color: #F00">${row.id}</strong>`;
+    vfRenderFunc: (_row: any, _column: VfField, _index: number, _calFunc: string, value: any) => {
+      return `ID: <strong style="color: #F00">${value}</strong>`;
     },
   },
   {
@@ -163,21 +163,38 @@ const actions: VfField[] = [
     vfCode: "detail",
     vfType: VfType.ACTION,
     // vfAcutalField: 'detail',
-    vfActualFieldTitle: "Xem",
+    // vfActualFieldTitle: "Xem",
   },
   {
     vfTitle: "Sửa",
     vfCode: "update",
     vfType: VfType.ACTION,
     // vfAcutalField: 'update',
-    vfActualFieldTitle: "Sửa",
+    // vfActualFieldTitle: "Sửa",
   },
   {
     vfTitle: "Xóa",
     vfCode: "delete",
     vfType: VfType.ACTION,
     // vfAcutalField: 'delete',
-    vfActualFieldTitle: "Xóa",
+    // vfActualFieldTitle: "Xóa",
+  },
+  {
+    vfTitle: "Detail name",
+    vfCode: "detail-name",
+    vfType: VfType.ACTION,
+    vfAcutalField: 'name',
+    // vfActualFieldTitle: "Detail",
+  },
+  {
+    vfTitle: "Detail name func",
+    vfCode: "detail-name-func",
+    vfType: VfType.ACTION,
+    vfAcutalField: 'name',
+    // vfActualFieldTitle: "Detail",
+    vfRenderFunc: (row: any) => {
+      return row.name;
+    },
   },
 ];
 

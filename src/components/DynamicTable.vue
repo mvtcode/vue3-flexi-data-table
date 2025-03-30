@@ -65,7 +65,7 @@ onMounted(() => {
   callFunction.value = `${prefixFunction}${Math.floor(Math.random() * 1e6)}`;
   const w: any = window;
   w[callFunction.value] = function (action: string, index: number) {
-    const row = props.data?[index]: undefined;
+    const row = props.data[index];
     row && emit('onCta', action, row, index);
   }
 });
@@ -78,19 +78,21 @@ onBeforeUnmount(() => {
   }
 })
 
-function flattenObject(obj: any, parentKey: string = '', result: FlattenedObject = {}): FlattenedObject {
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      const prefixedKey = parentKey ? `${parentKey}.${key}` : key;
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
-        flattenObject(obj[key], prefixedKey, result);
-      } else {
-        result[prefixedKey] = obj[key];
+const flattenObject = computed(() => {
+  return (obj: any, parentKey: string = '', result: FlattenedObject = {}): FlattenedObject => {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const prefixedKey = parentKey ? `${parentKey}.${key}` : key;
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          flattenObject.value(obj[key], prefixedKey, result);
+        } else {
+          result[prefixedKey] = obj[key];
+        }
       }
     }
+    return result;
   }
-  return result;
-}
+});
 
 const render = (template: string, values: {[key: string]: any}): string => {
   return template.replace(/\{\{(.*?)\}\}/g, (match, key) => {
@@ -159,7 +161,21 @@ const getValue = computed(() => {
             break;
 
           case VfType.ACTION:
-            const actionValue = `<span class="btn btn-${fieldInfo.vfAcutalField}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${fieldInfo?.vfTitle || ''}</span>`;
+            if (fieldInfo.vfRenderFunc) {
+              const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
+              values.push(`<span class="btn btn-${fieldInfo.vfCode}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${vFun}</span>`);
+              break;
+            }
+
+            if (fieldInfo.vfAcutalField) {
+              const objectRow = flattenObject.value(row);
+              const value = objectRow[fieldInfo?.vfAcutalField || ''];
+              const actionValue = `<span class="btn btn-${fieldInfo.vfCode}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${value || ''}</span>`;
+              values.push(actionValue);
+              break;
+            }
+
+            const actionValue = `<span class="btn btn-${fieldInfo.vfCode}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${fieldInfo?.vfTitle || ''}</span>`;
             values.push(actionValue);
             break;
 
@@ -174,8 +190,11 @@ const getValue = computed(() => {
             break;
 
           default:
+            const objectRow = flattenObject.value(row);
+            let value = objectRow[fieldInfo?.vfAcutalField || ''];
+
             if (fieldInfo.vfRenderFunc) {
-              const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
+              const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value, structuredClone(value));
               values.push(vFun);
               break;
             }
@@ -187,8 +206,6 @@ const getValue = computed(() => {
               break;
             }
 
-            const objectRow = flattenObject(row);
-            let value = objectRow[fieldInfo?.vfAcutalField || ''];
             if (fieldInfo?.enum && Object.keys(fieldInfo.enum).length > 0) {
               value = fieldInfo.enum[value] || value;
               value = escapeHtml(value);

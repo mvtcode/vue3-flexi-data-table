@@ -18,7 +18,8 @@ export interface VfField {
     row: any,
     column: VfField,
     index: number,
-    calFunc: string
+    calFunc: string,
+    value?: any
   ) => string;
   enum?: { [key: string]: string | number };
   value?: string;

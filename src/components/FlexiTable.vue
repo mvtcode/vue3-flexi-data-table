@@ -113,7 +113,6 @@ import DynamicTable from './DynamicTable.vue';
 import TableEditor from './TableEditor.vue';
 import { Column, VfField, LayoutTemplate } from '@/interfaces/table';
 import { v4 as uuidv4 } from 'uuid';
-import { title } from 'process';
 
 interface LayoutTemplateEdit extends LayoutTemplate {
   isSave: boolean;
@@ -210,7 +209,7 @@ const onCloneHandle = () => {
     id: newId,
     title: `${selectedLayoutEdit.value?.title || ''} clone`
   }
-  layoutsEdit.value.push(newLayout);
+  layoutsEdit.value.push(newLayout as LayoutTemplateEdit);
   editingId.value = newId;
 };
 
@@ -236,7 +235,7 @@ const onDeleteHandle = () => {
 const onSaveHandle = () => {
   const saveLayout = JSON.parse(JSON.stringify(selectedLayoutEdit.value));
   delete saveLayout.isSave;
-  emit('save', saveLayout, () => {
+  emit('save', saveLayout as LayoutTemplate, () => {
     selectedLayoutEdit.value && (selectedLayoutEdit.value.isSave = true);
   });
 };
