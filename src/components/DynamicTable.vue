@@ -163,30 +163,47 @@ const getValue = computed(() => {
           case VfType.ACTION:
             if (fieldInfo.vfRenderFunc) {
               const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
-              values.push(`<span class="btn btn-${fieldInfo.vfCode}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${vFun}</span>`);
+              const span = document.createElement("span");
+              span.classList.add('btn');
+              span.classList.add(`btn-${fieldInfo.vfCode}`);
+              span.setAttribute('onClick', `${callFunction.value}('${fieldInfo.vfCode}', ${index})`);
+              span.textContent = vFun;
+              values.push(span.outerHTML);
               break;
             }
 
             if (fieldInfo.vfAcutalField) {
               const objectRow = flattenObject.value(row);
               const value = objectRow[fieldInfo?.vfAcutalField || ''];
-              const actionValue = `<span class="btn btn-${fieldInfo.vfCode}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${value || ''}</span>`;
-              values.push(actionValue);
+              const span = document.createElement("span");
+              span.classList.add('btn');
+              span.classList.add(`btn-${fieldInfo.vfCode}`);
+              span.setAttribute('onClick', `${callFunction.value}('${fieldInfo.vfCode}', ${index})`);
+              span.textContent = value || '';
+              values.push(span.outerHTML);
               break;
             }
 
-            const actionValue = `<span class="btn btn-${fieldInfo.vfCode}" onClick="${callFunction.value}('${fieldInfo.vfCode}', ${index})">${fieldInfo?.vfTitle || ''}</span>`;
-            values.push(actionValue);
+            const spanx = document.createElement("span");
+            spanx.classList.add('btn');
+            spanx.classList.add(`btn-${fieldInfo.vfCode}`);
+            spanx.setAttribute('onClick', `${callFunction.value}('${fieldInfo.vfCode}', ${index})`);
+            spanx.textContent = fieldInfo?.vfTitle || '';
+            values.push(spanx.outerHTML);
             break;
 
           case VfType.ICON:
-            const iconValue = `<img class="icon" src="${fieldInfo.value}"/>`;
-            values.push(iconValue);
+            const img = document.createElement("img");
+            img.classList.add('icon');
+            img.src = fieldInfo.value || '';
+            values.push(img.outerHTML);
             break;
 
           case VfType.LABEL:
-            const labelValue = `<span style="${getStyleLabel.value(fieldInfo)}">${fieldInfo.vfTitle}</span>`;
-            values.push(labelValue);
+            const span = document.createElement("span");
+            span.style.cssText = getStyleLabel.value(fieldInfo);
+            span.textContent = fieldInfo.vfTitle;
+            values.push(span.outerHTML);
             break;
 
           default:

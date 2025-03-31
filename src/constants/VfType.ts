@@ -1,0 +1,16 @@
+export enum VfType {
+  ICON = 'ICON',
+  TEXT = 'TEXT',
+  NUMBER = 'NUMBER',
+  DATE = 'DATE',
+  BOOLEAN = 'BOOLEAN',
+  CURRENCY = 'CURRENCY',
+  PERCENTAGE = 'PERCENTAGE',
+  EMAIL = 'EMAIL',
+  PHONE = 'PHONE',
+  URL = 'URL',
+  ADDRESS = 'ADDRESS',
+  CUSTOM = 'CUSTOM',
+  SYMBOL = 'SYMBOL',
+  ACTION = 'ACTION'
+} 

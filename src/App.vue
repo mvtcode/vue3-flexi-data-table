@@ -46,7 +46,10 @@ const vfFields: VfField[] = [
     vfActualFieldTitle: "Mã SV",
     templateShow: "MSV: {{value}}",
     vfRenderFunc: (_row: any, _column: VfField, _index: number, _calFunc: string, value: any) => {
-      return `ID: <strong style="color: #F00">${value}</strong>`;
+      const strong = document.createElement("strong");
+      strong.style.color = "#F00";
+      strong.textContent = value;
+      return `ID: ${strong.outerHTML}`;
     },
   },
   {
@@ -77,9 +80,10 @@ const vfFields: VfField[] = [
     vfAcutalField: "gender",
     vfActualFieldTitle: "Giới tính",
     vfRenderFunc: (row: any) => {
-      return `<span style="color: ${row.gender === "Nam" ? "red" : "blue"}">${
-        row.gender
-      }</span>`;
+      const span = document.createElement("span");
+      span.style.color = row.gender === "Nam" ? "red" : "blue";
+      span.textContent = row.gender;
+      return span.outerHTML;
     },
   },
   {
