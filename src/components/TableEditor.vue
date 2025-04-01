@@ -94,15 +94,27 @@
 
       <div class="edit-columns etc-field custom-scroll">
         <div>
-          <h5>Separator</h5>
+          <div class="justify-content-space-between">
+            <h5> Labels </h5>
+            <div>
+              <button class="btn-plus" :disabled="disabled" @click="onAddLabel">✚</button>
+              <!-- <Popper placement="left-start" arrow class="popper-wrapper">
+                <button class="btn-plus btn-more" :disabled="disabled" @click="onAddLabel">✚</button>
+                <template #content>
+                  <div class="popover-action">
+                    more
+                  </div>
+                </template>
+              </Popper> -->
+            </div>
+          </div>
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
-            <li v-for="field in symbols" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+            <li v-for="field in labelsTransform" :key="field.vfCode">
+              <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
-
 
         <div style="margin-top: 10px">
           <h5>Actions</h5>
@@ -115,28 +127,15 @@
         </div>
 
         <div style="margin-top: 10px">
-          <div class="justify-content-space-between">
-          <h5> Labels </h5>
-          <div>
-            <button class="btn-plus" :disabled="disabled" @click="onAddLabel">✚</button>
-            <!-- <Popper placement="left-start" arrow class="popper-wrapper">
-              <button class="btn-plus btn-more" :disabled="disabled" @click="onAddLabel">✚</button>
-              <template #content>
-                <div class="popover-action">
-                  more
-                </div>
-              </template>
-            </Popper> -->
-          </div>
-        </div>
+          <h5>Separator</h5>
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
-            <li v-for="field in labelsTransform" :key="field.vfCode">
-              <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+            <li v-for="field in symbols" :key="field.vfAcutalField">
+              <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
-        
+
         <div style="margin-top: 10px">
           <h5>Icons</h5>
           <hr style="margin: 5px 0"/>
