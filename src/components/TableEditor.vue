@@ -87,7 +87,7 @@
         <ul class="list-field custom-scroll">
           <li v-for="field in listFields" :key="field.field">
             <div class="label">{{ field.title }}:</div>
-            <div class="item" draggable="true" @dragstart="e => onDragstart(e, vfield)" v-for="vfield in field.variants" :key="vfield.vfCode" @dblclick="onAddingField(vfield)"> {{ vfield.vfTitle }} </div>
+            <div class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, vfield)" v-for="vfield in field.variants" :key="vfield.vfCode" @dblclick="onAddingField(vfield)"> {{ vfield.vfTitle }} </div>
           </li>
         </ul>
       </div>
@@ -98,7 +98,7 @@
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in symbols" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
@@ -109,7 +109,7 @@
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in actions" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item btn" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              <div @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
@@ -132,7 +132,7 @@
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in labelsTransform" :key="field.vfCode">
-              <div @click="onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
             </li>
           </ul>
         </div>
@@ -142,7 +142,7 @@
           <hr style="margin: 5px 0"/>
           <ul class="list-field-symbol">
             <li v-for="field in icons" :key="field.vfAcutalField">
-              <img @dblclick="onAddingField(field)" :src="field.value" class="icon" draggable="true" @dragstart="e => onDragstart(e, field)"/>
+              <img @dblclick="onAddingField(field)" :src="field.value" class="icon" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"/>
             </li>
           </ul>
         </div>
@@ -372,6 +372,10 @@ const handleSaveLabel = (data: LabelField) => {
   font-size: 12px;
 }
 
+.disabled {
+  cursor: not-allowed !important;
+}
+
 .grid-col-2 {
   display: grid;
   grid-template-columns: 3fr 2fr 1fr;
@@ -414,6 +418,7 @@ const handleSaveLabel = (data: LabelField) => {
       margin: 0;
       max-height: calc(100% - 33px);
       overflow: auto;
+
       li {
         border-radius: 5px;
         white-space: nowrap;
