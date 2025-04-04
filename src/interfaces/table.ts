@@ -60,3 +60,14 @@ export interface Column {
   cssValue?: string;
   isDrag?: boolean;
 }
+
+export interface LabelPreset {
+  name: string;
+  style: {
+    color: string;
+    backgroundColor: string;
+    fontWeight: string;
+    fontStyle: string;
+    textDecoration: string;
+  }
+}

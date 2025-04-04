@@ -6,6 +6,7 @@
     :actions="actions"
     :icons="icons"
     :data="data"
+    :label-presets="labelPresets"
     @onCta="onCta"
     @error="onErrorHandle"
     @save="onSaveHandle"
@@ -17,10 +18,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import FlexiTable from "./components/FlexiTable.vue";
-import { VfField, VfType, Column, LayoutTemplate } from "./interfaces/table";
+import { VfField, VfType, LayoutTemplate, LabelPreset } from "./interfaces/table";
 
 const keyStore = "flexi-layout";
 const cacheDefault = `${keyStore}.default`;
+
+const labelPresets: LabelPreset[] = [
+  {
+    name: "Mẫu 1",
+    style: {
+      color: "#999999",
+      backgroundColor: "transparent",
+      fontWeight: "",
+      fontStyle: "",
+      textDecoration: "",
+    }
+  }
+];
 
 const vfFields: VfField[] = [
   {

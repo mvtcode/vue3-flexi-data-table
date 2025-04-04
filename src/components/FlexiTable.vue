@@ -99,6 +99,7 @@
             :icons="icons"
             :height="450"
             :disabled="selectedLayoutEdit?.isSystem"
+            :label-presets="labelPresets"
             @error="handleEditorError"
           />
         </div>
@@ -111,7 +112,7 @@
 import { ref, computed, onMounted } from 'vue';
 import DynamicTable from './DynamicTable.vue';
 import TableEditor from './TableEditor.vue';
-import { Column, VfField, LayoutTemplate } from '@/interfaces/table';
+import { Column, VfField, LayoutTemplate, LabelPreset } from '@/interfaces/table';
 import { v4 as uuidv4 } from 'uuid';
 
 interface LayoutTemplateEdit extends LayoutTemplate {
@@ -127,6 +128,7 @@ interface Props {
   data: any[];
   height?: number;
   fixed?: boolean;
+  labelPresets?: LabelPreset[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -135,6 +137,7 @@ const props = withDefaults(defineProps<Props>(), {
   actions: () => [],
   icons: () => [],
   data: () => [],
+  labelPresets: () => [],
 });
 
 const emit = defineEmits<{

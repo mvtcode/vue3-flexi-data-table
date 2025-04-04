@@ -6,6 +6,31 @@
         <input ref="inputTitleRef" class="input-title" v-model="labelData.title" type="text" placeholder="Nhập tiêu đề...">
       </div>
 
+      <div v-if="presets && presets.length > 0" class="input-group presets-section">
+        <label>Mẫu có sẵn:</label>
+        <div class="presets-list">
+          <span 
+            v-for="preset in presets" 
+            :key="preset.name"
+            class="preset-item"
+            @click="applyPreset(preset)"
+          >
+            <span 
+              class="preset-preview"
+              :style="{
+                color: preset.style.color,
+                backgroundColor: preset.style.backgroundColor,
+                fontWeight: preset.style.fontWeight,
+                fontStyle: preset.style.fontStyle,
+                textDecoration: preset.style.textDecoration
+              }"
+            >
+              {{ preset.name }}
+            </span>
+          </span>
+        </div>
+      </div>
+
       <div class="input-group">
         <label>Màu chữ:</label>
         <div class="color-picker">
@@ -87,7 +112,14 @@
 <script setup lang="ts">
 import { ref, defineEmits, nextTick } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
-import type { LabelField } from '@/interfaces/table'
+import type { LabelField, LabelPreset } from '@/interfaces/table'
+
+interface Props {
+  presets?: LabelPreset[]
+}
+const props = withDefaults(defineProps<Props>(), {
+  presets: () => []
+});
 
 const emit = defineEmits<{
   (e: 'save', value: LabelField): void
@@ -109,7 +141,7 @@ const labelData = ref<LabelField>({
 })
 
 const textColors = [
-  '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
+  '#000000', "#999999", '#ffffff', '#ff0000', '#00ff00', '#0000ff',
   '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080'
 ]
 
@@ -178,6 +210,11 @@ const show = (data?: LabelField) => {
   })
 };
 
+const applyPreset = (preset: LabelPreset) => {
+  if (!labelData.value.style) return
+  labelData.value.style = { ...preset.style }
+}
+
 defineExpose({
   show
 })
@@ -201,6 +238,35 @@ defineExpose({
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .presets-section {
+      .presets-list {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .preset-item {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 0;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform 0.2s;
+        display: inline-block;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+
+        .preset-preview {
+          display: block;
+          padding: 8px 10px;
+          font-size: 14px;
+        }
+      }
+    }
 
     .input-group {
       margin-bottom: 15px;

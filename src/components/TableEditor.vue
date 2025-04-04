@@ -150,6 +150,7 @@
     
     <PopupEditLabel
       ref="popupEditLabelRef"
+      :presets="labelPresets"
       @save="handleSaveLabel"
     />
   </div>
@@ -160,7 +161,7 @@ import { computed, ref } from 'vue';
 import { VueDraggableNext as draggable } from "vue-draggable-next";
 import Popper from "vue3-popper";
 import { toJson } from '@/utils/parse';
-import { VfField, VariantsField, Column, VfType, LabelField } from '@/interfaces/table';
+import { VfField, VariantsField, Column, VfType, LabelField, LabelPreset } from '@/interfaces/table';
 import type { CSSProperties } from 'vue';
 import { symbols } from '@/constants/symbols';
 import AlignLeftIcon from '@/assets/icons/align-left.svg';
@@ -180,11 +181,13 @@ interface Props {
   icons: VfField[];
   height?: number;
   disabled?: boolean;
+  labelPresets?: LabelPreset[];
 }
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   height: 390,
-  // labels: () => [],
+  labelPresets: () => [],
+  labels: () => [],
   actions: () => [],
   icons: () => [],
   vfFields: () => [],
