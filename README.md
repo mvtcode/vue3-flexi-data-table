@@ -28,6 +28,26 @@ A flexible data table component for Vue 3 with rich features.
   - Column type support (data/select)
   - Symbol and icon integration
 
+## Screenshot
+
+![Screenshot](./screenshot.png)
+
+## License
+
+MIT
+
+## Author
+
+### Tanmv
+
+- GitHub: [tanmv](https://github.com/mvtcode)
+
+### Contact for work
+
+- Email: tanmv@mpos.vn
+- Telegram: @tanmac
+- Skype: trai_12a1
+
 ## Installation
 
 ```bash
@@ -165,6 +185,85 @@ const clearSelection = () => {
 </script>
 ```
 
-## License
+### Table with Custom Templates
 
-MIT
+```vue
+<template>
+  <DynamicTable 
+    :columns="columns"
+    :data="data"
+    :templates="templates"
+  />
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { DynamicTable } from 'vue3-flexi-data-table';
+
+const templates = ref([
+  {
+    vfCode: 'status',
+    vfType: 'DATA',
+    vfRenderFunc: (row) => {
+      return row.status === 'active' ? '🟢 Active' : '🔴 Inactive';
+    }
+  }
+]);
+
+const columns = ref([
+  {
+    title: 'Status',
+    fieldCodes: ['status']
+  }
+]);
+
+const data = ref([
+  { status: 'active' },
+  { status: 'inactive' }
+]);
+</script>
+```
+
+## Props
+
+### DynamicTable Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| columns | Column[] | [] | Array of column configurations |
+| data | any[] | [] | Array of data to display |
+| templates | VfField[] | [] | Array of field templates |
+| labels | LabelField[] | [] | Array of label configurations |
+| height | number | - | Fixed height of the table |
+| fixed | boolean | false | Whether to fix the table height |
+
+### TableEditor Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| modelValue | Column[] | [] | Array of column configurations |
+| vfFields | VfField[] | [] | Array of field templates |
+| actions | VfField[] | [] | Array of action templates |
+| icons | VfField[] | [] | Array of icon templates |
+| labels | LabelField[] | [] | Array of label configurations |
+| height | number | 390 | Height of the editor |
+| disabled | boolean | false | Whether the editor is disabled |
+| labelPresets | LabelPreset[] | [] | Array of label style presets |
+
+## Events
+
+### DynamicTable Events
+
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| sortChange | { field: string, direction: 'asc' \| 'desc' } | Emitted when sort changes |
+| selectChange | number[] | Emitted when selection changes |
+| onCta | (action: string, row: any, index: number) | Emitted when a custom action is triggered |
+
+### TableEditor Events
+
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| update:modelValue | Column[] | Emitted when columns are updated |
+| update:labels | LabelField[] | Emitted when labels are updated |
+| error | string | Emitted when an error occurs |
