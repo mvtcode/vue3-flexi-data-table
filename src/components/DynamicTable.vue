@@ -68,6 +68,7 @@ import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties, 
 import { Column, LabelField, VfField, VfType, LabelStyle, ColumnType } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
+import DOMPurify from 'dompurify';
 
 import '@/assets/style.scss';
 
@@ -100,6 +101,19 @@ const emit = defineEmits<{
 const prefixFunction = 'tdac';
 const callFunction = ref('');
 
+// Định nghĩa event handler function
+const handleActionClick = (e: Event) => {
+  const target = e.target as HTMLElement;
+  if (target.hasAttribute('data-action')) {
+    const action = target.getAttribute('data-action');
+    const index = parseInt(target.getAttribute('data-index') || '-1', 10);
+    if (action && index >= 0) {
+      const row = props.data[index];
+      row && emit('onCta', action, row, index);
+    }
+  }
+};
+
 onMounted(() => {
   callFunction.value = `${prefixFunction}${Math.floor(Math.random() * 1e6)}`;
   const w: any = window;
@@ -107,6 +121,9 @@ onMounted(() => {
     const row = props.data[index];
     row && emit('onCta', action, row, index);
   }
+
+  // Add event listener for actions
+  document.addEventListener('click', handleActionClick);
 });
 
 onBeforeUnmount(() => {
@@ -115,6 +132,9 @@ onBeforeUnmount(() => {
     w[callFunction.value] = undefined;
     delete w[callFunction.value];
   }
+  
+  // Remove event listener
+  document.removeEventListener('click', handleActionClick);
 })
 
 const flattenObject = computed(() => {
@@ -194,6 +214,52 @@ const getStyleLabel = computed(() => (field: VfField): string => {
   return styleEntries.join(';');
 })
 
+// Cấu hình DOMPurify
+const sanitizeConfig = {
+  ALLOWED_TAGS: ['div', 'span', 'img', 'strong', 'b', 'i', 'em', 'br', 'p', 'a'],
+  ALLOWED_ATTR: [
+    'class', 'style', 'src', 'alt', 'title', 
+    'data-action', 'data-index', 'href',
+    'onclick'
+  ],
+  ADD_ATTR: ['target', 'rel'],
+  ALLOW_DATA_ATTR: true,
+  ALLOW_UNKNOWN_PROTOCOLS: true,
+  KEEP_CONTENT: true,
+};
+
+// Hàm decode HTML entities
+const decodeHtmlEntities = (str: string): string => {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = str;
+  return textarea.value;
+};
+
+// Hàm xử lý HTML content
+const processHtmlContent = (html: any): string => {
+  if (typeof html !== 'string') {
+    return String(html);
+  }
+  
+  // Chỉ thay thế các ký tự đặc biệt khác, giữ nguyên &nbsp; và |
+  const processed = html
+    .replace(/&hyphen;/g, '-')
+    .replace(/&vert;/g, '|');
+  
+  return DOMPurify.sanitize(processed, {
+    ...sanitizeConfig,
+    ALLOW_ARIA_ATTR: true,
+  });
+};
+
+// Hàm escape text an toàn
+const safeEscapeText = (text: string): string => {
+  if (typeof text !== 'string') {
+    return String(text);
+  }
+  return escapeHtml(decodeHtmlEntities(text));
+};
+
 const getValue = computed(() => {
   return (row: any, column: Column, index: number) => {
     const values: string[] = [];
@@ -202,17 +268,17 @@ const getValue = computed(() => {
       if (fieldInfo) {
         switch (fieldInfo.vfType) {
           case VfType.SYMBOL:
-            values.push(fieldInfo?.value || '');
+            values.push(processHtmlContent(fieldInfo?.value || ''));
             break;
 
           case VfType.ACTION:
             if (fieldInfo.vfRenderFunc) {
               const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
               const span = document.createElement("span");
-              span.classList.add('btn');
-              span.classList.add(`btn-${fieldInfo.vfCode}`);
-              span.setAttribute('onClick', `${callFunction.value}('${fieldInfo.vfCode}', ${index})`);
-              span.textContent = vFun;
+              span.classList.add('btn', `btn-${fieldInfo.vfCode}`);
+              span.setAttribute('data-action', fieldInfo.vfCode);
+              span.setAttribute('data-index', String(index));
+              span.innerHTML = processHtmlContent(vFun);
               values.push(span.outerHTML);
               break;
             }
@@ -221,19 +287,19 @@ const getValue = computed(() => {
               const objectRow = flattenObject.value(row);
               const value = objectRow[fieldInfo?.vfAcutalField || ''];
               const span = document.createElement("span");
-              span.classList.add('btn');
-              span.classList.add(`btn-${fieldInfo.vfCode}`);
-              span.setAttribute('onClick', `${callFunction.value}('${fieldInfo.vfCode}', ${index})`);
-              span.textContent = value || '';
+              span.classList.add('btn', `btn-${fieldInfo.vfCode}`);
+              span.setAttribute('data-action', fieldInfo.vfCode);
+              span.setAttribute('data-index', String(index));
+              span.innerHTML = processHtmlContent(value || '');
               values.push(span.outerHTML);
               break;
             }
 
             const spanx = document.createElement("span");
-            spanx.classList.add('btn');
-            spanx.classList.add(`btn-${fieldInfo.vfCode}`);
-            spanx.setAttribute('onClick', `${callFunction.value}('${fieldInfo.vfCode}', ${index})`);
-            spanx.textContent = fieldInfo?.vfTitle || '';
+            spanx.classList.add('btn', `btn-${fieldInfo.vfCode}`);
+            spanx.setAttribute('data-action', fieldInfo.vfCode);
+            spanx.setAttribute('data-index', String(index));
+            spanx.innerHTML = processHtmlContent(fieldInfo?.vfTitle || '');
             values.push(spanx.outerHTML);
             break;
 
@@ -241,13 +307,14 @@ const getValue = computed(() => {
             const img = document.createElement("img");
             img.classList.add('icon');
             img.src = fieldInfo.value || '';
+            img.alt = safeEscapeText(fieldInfo.vfTitle || '');
             values.push(img.outerHTML);
             break;
 
           case VfType.LABEL:
             const span = document.createElement("span");
             span.style.cssText = getStyleLabel.value(fieldInfo);
-            span.textContent = fieldInfo.vfTitle;
+            span.innerHTML = processHtmlContent(fieldInfo.vfTitle);
             values.push(span.outerHTML);
             break;
 
@@ -257,27 +324,35 @@ const getValue = computed(() => {
 
             if (fieldInfo.vfRenderFunc) {
               const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value, structuredClone(value));
-              values.push(vFun);
+              values.push(processHtmlContent(vFun));
               break;
             }
 
             const rowValue = row[fieldInfo.vfAcutalField as string];
             if(Array.isArray(rowValue)) {
-              const vArr = fieldInfo.templateShow ? rowValue.map((item: any) => render(fieldInfo.templateShow as string, {$item: escapeHtml(item)})).join('') : rowValue.join(', ');
-              values.push(vArr);
+              const vArr = fieldInfo.templateShow 
+                ? rowValue.map((item: any) => {
+                    return render(fieldInfo.templateShow as string, {
+                      $item: processHtmlContent(item)
+                    });
+                  }).join('') 
+                : rowValue.map(item => safeEscapeText(item)).join('|');
+              values.push(processHtmlContent(vArr));
               break;
             }
 
             if (fieldInfo?.enum && Object.keys(fieldInfo.enum).length > 0) {
               value = fieldInfo.enum[value] || value;
-              value = escapeHtml(value);
             }
 
             if (fieldInfo?.templateShow) {
-              value = render(fieldInfo?.templateShow, {value: escapeHtml(value)});
+              value = render(fieldInfo?.templateShow, {
+                value: processHtmlContent(value)
+              });
+              values.push(value);
+            } else {
+              values.push(safeEscapeText(value));
             }
-
-            values.push(value);
             break;
         }
       }
