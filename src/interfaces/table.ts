@@ -1,5 +1,9 @@
 import type { CSSProperties } from 'vue';
 
+export interface LabelStyle extends CSSProperties {
+  widthUnit?: string;
+}
+
 export enum VfType {
   DATA = "DATA",
   SYMBOL = "SYMBOL",
@@ -36,7 +40,7 @@ export interface VariantsField {
 export interface LabelField {
   title: string;
   code: string;
-  style?: CSSProperties;
+  style?: LabelStyle;
 }
 
 export interface LayoutTemplate {
@@ -48,17 +52,27 @@ export interface LayoutTemplate {
   labels?: LabelField[];
 }
 
+export enum ColumnType {
+  DATA = 'DATA',
+  SELECT = 'SELECT'
+}
+
+export interface SortConfig {
+  field: string; // vfActualField hoặc vfActualFieldTitle để sort
+  direction?: 'asc' | 'desc';
+}
+
 export interface Column {
   title: string;
   fieldCodes: string[];
+  isDrag?: boolean;
+  type?: ColumnType;
+  align?: 'left' | 'center' | 'right';
+  vAlign?: 'top' | 'middle' | 'bottom';
   width?: string;
   minWidth?: string;
   maxWidth?: string;
-  align?: "left" | "center" | "right";
-  vAlign?: "top" | "middle" | "bottom";
-  cssHeader?: string;
-  cssValue?: string;
-  isDrag?: boolean;
+  sortField?: string;
 }
 
 export interface LabelPreset {

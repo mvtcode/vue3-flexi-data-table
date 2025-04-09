@@ -1,12 +1,21 @@
 import { defineConfig } from 'vite';
-import { resolve } from "path";
 import vue from '@vitejs/plugin-vue';
-import { fileURLToPath, URL } from 'url';
-import dts from "vite-plugin-dts";
+import dts from 'vite-plugin-dts';
+import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), dts()],
+  plugins: [
+    vue(),
+    dts({
+      insertTypesEntry: true,
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   build: {
     lib: {
       // src/indext.ts is where we have exported the component(s)
@@ -27,14 +36,9 @@ export default defineConfig({
         },
       },
     },
-    sourcemap: false,
+    sourcemap: true,
   },
   css: {
     devSourcemap: false,
-  },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
   },
 })

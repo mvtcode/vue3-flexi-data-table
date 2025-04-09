@@ -1,150 +1,281 @@
-# vue3-flexi-data-table
+# Vue3 Flexi Data Table
 
-Library used for vue 3 so users can edit table columns according to their wishes.
+A flexible data table component for Vue 3 with rich features.
 
 ## Features
 
-## Install
+- 🔄 Dynamic column configuration
+- 📱 Responsive design
+- ✨ Rich data display options
+- 🎯 Custom field rendering
+- 🔍 Column sorting
+  - Configure sortable fields in column editor
+  - Click header to cycle through sort states (ascending → descending → no sort)
+  - Only one column can be sorted at a time
+- ✅ Row selection
+  - Single/Multiple row selection
+  - Select all/Deselect all
+  - Get/Set selected rows programmatically
+- 🎨 Flexible styling
+  - Column alignment (horizontal & vertical)
+  - Custom width settings (fixed, min, max)
+  - Custom CSS for header and cells
+- 🏷️ Label system
+  - Create and manage custom labels
+  - Style labels with colors and sizes
+- 🛠️ Rich customization options
+  - Column reordering via drag & drop
+  - Column type support (data/select)
+  - Symbol and icon integration
 
-Install from npm
+## Screenshot
 
-```
-npm i vue3-flexi-data-table
-```
+![Screenshot](./screenshot.png)
 
-Import style
+## License
 
-```
-import 'vue3-flexi-data-table/style.css';
-```
+MIT
 
-Use table for show data
+## Author
 
-```
-import { DynamicTable } from 'vue3-flexi-data-table';
-```
+### Tanmv
 
-Use tool edit for build columns
+- GitHub: [tanmv](https://github.com/mvtcode)
 
-```
-import { TableEditor } from 'vue3-flexi-data-table';
-```
-## Datatype
+### Contact for work
 
-```javascript
-// field type
-enum VfType {
-  DATA = 'DATA', // use for get data of data table
-  SYMBOL = 'SYMBOL', // use for separator
-  ACTION = 'ACTION', // use for action button
-  ICON = 'ICON', // use for icon image
-}
+- Email: tanmv@mpos.vn
+- Telegram: @tanmac
+- Skype: trai_12a1
 
-// model - interface of virtual field
-interface VfField {
-  vfTitle: string; // variants of field show, can same vfActualFieldTitle if have 1 variants
-  vfCode: string; // field code unique
-  vfType: VfType; // field type above
-  vfAcutalField?: string; // field of data table
-  vfActualFieldTitle?: string; // title of field
-  enum?: {[key: string]: string | number}; // enum value | eg: 1: "Nam", 0: "Nữ"
-  value?: string; // use for vfType = SYMBOL, ICON | Symbol value: space: '&nbsp;', newline: '<br/>',... | ICON = url of icon
-  templateShow?: string; // custom for return value, format `MSV: {{value}}`, with: {{value}} = vfAcutalField (use for basic data type) | when vfAcutalField has type = array format: `MSV: {{$item}}`, with {{$item}} value of each item value
-  vfRenderFunc?: (row: any, column: VfField, index: number, calFunc: string) => string; // function custom return value for show, can return html, use for show custom format
-}
+## Installation
 
-// model of column
-export interface Column {
-  title: string; // title of header
-  fieldCodes: string[]; // array of vfCode
-  width?: string; // todo
-  align?: 'left' | 'center' | 'right'; // align
-  vAlign?: 'top' | 'middle' | 'bottom'; // vertical align
-  cssHeader?: string; // todo
-  cssValue?: string; // todo
-  isDrag?: boolean; // use for edit table, if it is true => header, value are color red, maybe you don't need to care
-}
-
+```bash
+npm install vue3-flexi-data-table
 ```
 
-## DynamicTable
+## Components
 
-properties
+### DynamicTable
 
-| Name    | Type | Require | default | Explain |
-| :---- | :---- | :---- | :---- | :---- |
-| fixed  | boolean | false  | false | Fixid header of table |
-| height  | number | when fixed is true  | 0 | show scroll when actual height > this value |
-| columns  | VfField[] | true  | [] | columns |
-| templates  | VfField[] | true  | [] | Includes:<br/>- `vfFields`<br/>- `actions`<br/>- `icons` |
+The main table component that displays data with configured columns.
 
-
-Event
-
-The event that will be received when you click on the field is `ACTION`
-
-| Name    | values | Explain |
-| :-------- | :------- | :--- |
-| onCta  | function(action: string, row: any, index: number) | - `action`: fieldCodes of field has vfType = ACTION<br/> - `row`: data full of row<br/> - `index`: index of row |
-
-
-## TableEditor
-
-Properties
-
-| Name    | Type | Require | default | Explain |
-| :---- | :---- | :---- | :---- | :---- |
-| v-model  | Column[] | true  | [] | columns of table |
-| vfFields  | VfField[] | true  | [] | fields define of data table |
-| actions  | VfField[] | false  | [] | define list actions |
-| icons  | VfField[] | false  | [] | define list icons |
-
-## Usage
-
-Full code used
-
-```html
+```vue
 <template>
-  <DynamicTable fixed :height="250" :columns="columnsEdit" :templates="[...vfFields, ...icons, ...actions]" :data="data" @onCta="onCta" />
-  <hr style="margin: 20px 0 0"/>
-  <div class="grid">
-    <div class="grid-item">
-      <h4>Build columns</h4>
-      <TableEditor v-model="columnsEdit" :vfFields="vfFields" :actions="actions" :icons="icons" />
-    </div>
-    <div class="grid-item">
-      <h4>Template columns</h4>
-      <textarea v-model="vfFieldsEdit" class="custom-scroll" />
-    </div>
-    <div class="grid-item">
-      <h4>Table data</h4>
-        <textarea v-model="dataEdit" class="custom-scroll" />
-    </div>
-  </div>
+  <DynamicTable 
+    :columns="columns"
+    :data="data"
+    :templates="templates"
+    :labels="labels"
+    :height="400"
+    :fixed="true"
+    @sortChange="handleSort"
+    @selectChange="handleSelect"
+    @onCta="handleAction"
+  />
+</template>
+```
 
-  <div class="grid-2-col">
-    <div class="grid-item">
-      <h4 style="margin-bottom: 10px;">Columns</h4>
-      <div class="box column-out custom-scroll">
-        {{ columnShow }}
-      </div>
-    </div>
-    <div class="grid-item">
-      <h4 style="margin-bottom: 10px;">Actions log</h4>
-      <div class="box column-out custom-scroll">
-        <pre>{{ actionSelects.join('\n') }}</pre>
-      </div>
-    </div>
-  </div>
+### TableEditor
+
+A component for configuring table columns with drag-and-drop support.
+
+```vue
+<template>
+  <TableEditor
+    v-model="columns"
+    :vfFields="fields"
+    :actions="actions"
+    :icons="icons"
+    :labels="labels"
+    :height="400"
+    @update:labels="handleLabelUpdate"
+  />
+</template>
+```
+
+## Usage Examples
+
+### Basic Table with Sorting
+
+```vue
+<template>
+  <DynamicTable 
+    :columns="columns"
+    :data="data"
+    @sortChange="handleSort"
+  />
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { DynamicTable } from 'vue3-flexi-data-table';
+
+const columns = ref([
+  {
+    title: 'Name',
+    fieldCodes: ['name'],
+    sortField: 'name' // Enable sorting for this column
+  },
+  {
+    title: 'Age',
+    fieldCodes: ['age'],
+    sortField: 'age',  // Enable sorting for this column
+    align: 'right'     // Right align numbers
+  }
+]);
+
+const data = ref([
+  { name: 'John Doe', age: 30 },
+  { name: 'Jane Smith', age: 25 },
+  // ... more data
+]);
+
+// Handle sort changes
+const handleSort = (sort) => {
+  const { field, direction } = sort;
+  // Implement your sorting logic here
+};
+</script>
+```
+
+### Table with Selection
+
+```vue
+<template>
+  <DynamicTable 
+    ref="tableRef"
+    :columns="columns"
+    :data="data"
+    @selectChange="handleSelect"
+  />
+  <button @click="selectFirstRow">Select First Row</button>
+  <button @click="clearSelection">Clear Selection</button>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { DynamicTable } from 'vue3-flexi-data-table';
+
+const tableRef = ref();
+const columns = ref([
+  {
+    type: 'SELECT',    // Add checkbox column
+    width: '40px'
+  },
+  {
+    title: 'Name',
+    fieldCodes: ['name']
+  }
+]);
+
+// Handle selection changes
+const handleSelect = (selectedRows) => {
+  console.log('Selected rows:', selectedRows);
+};
+
+// Example of using table methods
+const selectFirstRow = () => {
+  tableRef.value.setSelect([0]);
+};
+
+const clearSelection = () => {
+  tableRef.value.clearSelect();
+};
+</script>
+```
+
+### Table with Custom Templates
+
+```vue
+<template>
+  <DynamicTable 
+    :columns="columns"
+    :data="data"
+    :templates="templates"
+  />
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { DynamicTable } from 'vue3-flexi-data-table';
+
+const templates = ref([
+  {
+    vfCode: 'status',
+    vfType: 'DATA',
+    vfRenderFunc: (row) => {
+      return row.status === 'active' ? '🟢 Active' : '🔴 Inactive';
+    }
+  }
+]);
+
+const columns = ref([
+  {
+    title: 'Status',
+    fieldCodes: ['status']
+  }
+]);
+
+const data = ref([
+  { status: 'active' },
+  { status: 'inactive' }
+]);
+</script>
+```
+
+### FlexiTable Component
+
+FlexiTable là component chính của thư viện, cung cấp đầy đủ các tính năng như quản lý layout, sorting, filtering, và custom templates.
+
+```vue
+<template>
+  <FlexiTable
+    ref="flexiTableRef"
+    v-model="layoutId"
+    :layouts="layouts"
+    :templates="vfFields"
+    :actions="actions"
+    :icons="icons"
+    :data="dataTable"
+    :label-presets="labelPresets"
+    @onCta="onCta"
+    @error="onErrorHandle"
+    @save="onSaveHandle"
+    @remove="onRemoveHandle"
+    @setDefault="onSetDefaultHandle"
+    @selectChange="onSelectChange"
+    @sortChange="onSortChange"
+  >
+    <template #actions>
+      <button @click="getSelect">Get Select</button>
+      <button @click="setSelect([1, 2, 3])">Set Select</button>
+      <button @click="clearSelect">Clear Select</button>
+    </template>
+  </FlexiTable>
 </template>
 
 <script setup lang="ts">
-import 'vue3-flexi-data-table/style.css';
-import { computed, ref } from 'vue';
-import { DynamicTable, TableEditor, VfType } from 'vue3-flexi-data-table';
-import type { VfField, Column } from 'vue3-flexi-data-table';
+import { ref, onMounted, computed, reactive } from 'vue'
+import FlexiTable from 'vue3-flexi-data-table'
+import { VfField, VfType, LayoutTemplate, LabelPreset, Column, ColumnType } from 'vue3-flexi-data-table'
 
-const vfFields = ref<VfField[]> ([
+// Định nghĩa label presets
+const labelPresets: LabelPreset[] = [
+  {
+    name: 'Mẫu 1',
+    style: {
+      color: '#999999',
+      backgroundColor: 'transparent',
+      fontWeight: '',
+      fontStyle: '',
+      textDecoration: '',
+    },
+  },
+]
+
+// Định nghĩa các trường dữ liệu (templates)
+const vfFields: VfField[] = [
   {
     vfTitle: 'Mã SV',
     vfCode: 'id',
@@ -153,441 +284,522 @@ const vfFields = ref<VfField[]> ([
     vfActualFieldTitle: 'Mã SV',
   },
   {
-    vfTitle: 'MSV: {{value}}',
-    vfCode: 'id2',
-    vfType: VfType.DATA,
-    vfAcutalField: 'id',
-    vfActualFieldTitle: 'Mã SV',
-    templateShow: 'MSV: {{value}}',
-  },
-  {
-    vfTitle: 'Func Show',
-    vfCode: 'idFun',
-    vfType: VfType.DATA,
-    vfAcutalField: 'id',
-    vfActualFieldTitle: 'Mã SV',
-    templateShow: 'MSV: {{value}}',
-    vfRenderFunc: (row: any) => {
-      return `ID: <strong style="color: #F00">${row.id}</strong>`;
-    }
-  },
-  {
     vfTitle: 'Họ Tên',
     vfCode: 'name',
     vfType: VfType.DATA,
     vfAcutalField: 'name',
     vfActualFieldTitle: 'Họ tên',
   },
-  {
-    vfTitle: 'Tuổi',
-    vfCode: 'age',
-    vfType: VfType.DATA,
-    vfAcutalField: 'age',
-    vfActualFieldTitle: 'Tuổi',
-  },
+  // Custom template với render function
   {
     vfTitle: 'Giới tính',
-    vfCode: 'gender',
-    vfType: VfType.DATA,
-    vfAcutalField: 'gender',
-    vfActualFieldTitle: 'Giới tính',
-  },
-  {
-    vfTitle: 'Giới tính color',
     vfCode: 'gender2',
     vfType: VfType.DATA,
     vfAcutalField: 'gender',
     vfActualFieldTitle: 'Giới tính',
     vfRenderFunc: (row: any) => {
-      return `<span style="color: ${row.gender === 'Nam' ? 'red' : 'blue'}">${row.gender}</span>`;
-    }
+      const span = document.createElement('span')
+      span.style.color = row.gender === 'Nam' ? 'red' : 'blue'
+      span.textContent = row.gender
+      return span.outerHTML
+    },
+  },
+]
+
+// Định nghĩa các actions
+const actions: VfField[] = [
+  {
+    vfTitle: 'Xem',
+    vfCode: 'detail',
+    vfType: VfType.ACTION,
   },
   {
-    vfTitle: 'Ngành học',
-    vfCode: 'major',
+    vfTitle: 'Sửa',
+    vfCode: 'update',
+    vfType: VfType.ACTION,
+  },
+  {
+    vfTitle: 'Xóa',
+    vfCode: 'delete',
+    vfType: VfType.ACTION,
+  },
+]
+
+// Định nghĩa layout mặc định
+const defaultLayouts: LayoutTemplate[] = [
+  {
+    title: 'Mặc định',
+    id: '11111111-1111-1111-1111-111111111111',
+    isSystem: true,
+    columns: [
+      { title: 'Select', fieldCodes: [], isDrag: false, type: ColumnType.SELECT, align: 'center' },
+      { title: 'Mã sinh viên', fieldCodes: ['id'], sortField: 'id', type: ColumnType.DATA },
+      { title: 'Họ và tên', fieldCodes: ['name'], type: ColumnType.DATA, sortField: 'name' },
+      { title: 'Giới tính', fieldCodes: ['gender2'], type: ColumnType.DATA },
+      {
+        title: 'Actions',
+        fieldCodes: ['detail', 'space', 'update', 'space', 'delete'],
+        type: ColumnType.DATA,
+      },
+    ],
+  },
+]
+
+// State management
+const layoutId = ref(defaultLayouts[0].id)
+const layouts = ref<LayoutTemplate[]>(defaultLayouts)
+const sortConfig = reactive<{ field?: string; direction?: 'asc' | 'desc' }>({})
+const flexiTableRef = ref()
+
+// Event handlers
+const onCta = (action: string, row: any, index: number) => {
+  console.log(action, row, index)
+}
+
+const onErrorHandle = (msg: string) => {
+  alert(msg)
+}
+
+const onSaveHandle = (layout: LayoutTemplate, cb: () => void) => {
+  // Lưu layout vào localStorage
+  const saveId = layout.id
+  localStorage.setItem(`flexi-layout.${saveId}`, JSON.stringify(layout))
+  cb()
+}
+
+const onRemoveHandle = (id: string, cb: () => void) => {
+  // Xóa layout khỏi localStorage
+  localStorage.removeItem(`flexi-layout.${id}`)
+  cb()
+}
+
+const onSetDefaultHandle = (id: string, cb: () => void) => {
+  // Đặt layout mặc định
+  localStorage.setItem('flexi-layout.default', id)
+  layoutId.value = id
+  cb()
+}
+
+const onSelectChange = (selectedRows: number[]) => {
+  console.log('Selected rows:', selectedRows)
+}
+
+const onSortChange = ({ field, direction }: { field?: string; direction?: 'asc' | 'desc' }) => {
+  sortConfig.field = field
+  sortConfig.direction = direction
+}
+
+// Table methods
+const getSelect = () => {
+  console.log(flexiTableRef.value?.getSelect())
+}
+
+const setSelect = (indexes: number[]) => {
+  flexiTableRef.value?.setSelect(indexes)
+}
+
+const clearSelect = () => {
+  flexiTableRef.value?.clearSelect()
+}
+
+// Load saved layouts on mount
+onMounted(() => {
+  // Load layouts from localStorage
+  const savedLayouts = Object.keys(localStorage)
+    .filter(key => key.startsWith('flexi-layout.'))
+    .map(key => JSON.parse(localStorage.getItem(key) || '{}'))
+  
+  layouts.value.push(...savedLayouts)
+  
+  // Load default layout
+  const defaultId = localStorage.getItem('flexi-layout.default')
+  if (defaultId) {
+    layoutId.value = defaultId
+  }
+})
+</script>
+
+### FlexiTable Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| v-model | string | Yes | ID của layout đang được chọn |
+| layouts | LayoutTemplate[] | Yes | Danh sách các layout có sẵn |
+| templates | VfField[] | Yes | Định nghĩa các trường dữ liệu |
+| actions | VfField[] | No | Định nghĩa các action |
+| icons | VfField[] | No | Định nghĩa các icon |
+| data | any[] | Yes | Dữ liệu hiển thị trong bảng |
+| label-presets | LabelPreset[] | No | Các mẫu label định sẵn |
+
+### FlexiTable Events
+
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| onCta | (action: string, row: any, index: number) | Khi người dùng click vào action |
+| error | (message: string) | Khi có lỗi xảy ra |
+| save | (layout: LayoutTemplate, callback: () => void) | Khi lưu layout |
+| remove | (id: string, callback: () => void) | Khi xóa layout |
+| setDefault | (id: string, callback: () => void) | Khi đặt layout mặc định |
+| selectChange | (selectedRows: number[]) | Khi thay đổi selection |
+| sortChange | ({ field?: string, direction?: 'asc' \| 'desc' }) | Khi thay đổi sort |
+
+### FlexiTable Methods
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| getSelect | () | Lấy danh sách các row đang được chọn |
+| setSelect | (indexes: number[]) | Chọn các row theo index |
+| clearSelect | () | Xóa tất cả selection |
+
+## Props
+
+### DynamicTable Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| columns | Column[] | [] | Array of column configurations |
+| data | any[] | [] | Array of data to display |
+| templates | VfField[] | [] | Array of field templates |
+| labels | LabelField[] | [] | Array of label configurations |
+| height | number | - | Fixed height of the table |
+| fixed | boolean | false | Whether to fix the table height |
+
+### TableEditor Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| modelValue | Column[] | [] | Array of column configurations |
+| vfFields | VfField[] | [] | Array of field templates |
+| actions | VfField[] | [] | Array of action templates |
+| icons | VfField[] | [] | Array of icon templates |
+| labels | LabelField[] | [] | Array of label configurations |
+| height | number | 390 | Height of the editor |
+| disabled | boolean | false | Whether the editor is disabled |
+| labelPresets | LabelPreset[] | [] | Array of label style presets |
+
+## Events
+
+### DynamicTable Events
+
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| sortChange | { field: string, direction: 'asc' \| 'desc' } | Emitted when sort changes |
+| selectChange | number[] | Emitted when selection changes |
+| onCta | (action: string, row: any, index: number) | Emitted when a custom action is triggered |
+
+### TableEditor Events
+
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| update:modelValue | Column[] | Emitted when columns are updated |
+| update:labels | LabelField[] | Emitted when labels are updated |
+| error | string | Emitted when an error occurs |
+
+## Advanced Examples
+
+### Icons Integration
+
+```vue
+<template>
+  <FlexiTable
+    :templates="vfFields"
+    :icons="icons"
+    :data="data"
+  />
+</template>
+
+<script setup lang="ts">
+import { VfField, VfType } from 'vue3-flexi-data-table'
+
+// Định nghĩa icons
+const icons: VfField[] = [
+  {
+    vfTitle: 'bookmark',
+    vfCode: 'bookmark',
+    vfType: VfType.ICON,
+    vfActualFieldTitle: 'bookmark',
+    value: '/icons/bookmark.png',
+  },
+  {
+    vfTitle: 'star',
+    vfCode: 'star',
+    vfType: VfType.ICON,
+    vfActualFieldTitle: 'star',
+    value: '/icons/star.png',
+  },
+]
+
+// Sử dụng icons trong columns
+const defaultLayouts = [
+  {
+    title: 'Default',
+    id: 'default-layout',
+    columns: [
+      {
+        title: 'Status',
+        fieldCodes: ['star', 'space', 'status'],
+        type: ColumnType.DATA
+      }
+    ]
+  }
+]
+</script>
+```
+
+### Advanced Templates
+
+```vue
+<script setup lang="ts">
+// Template với custom format
+const vfFields: VfField[] = [
+  // Template với format string
+  {
+    vfTitle: 'MSV Format',
+    vfCode: 'id-format',
     vfType: VfType.DATA,
-    vfAcutalField: 'major',
-    vfActualFieldTitle: 'Ngành học',
+    vfAcutalField: 'id',
+    templateShow: 'MSV: {{value}}',
   },
+  
+  // Template với render function
   {
-    vfTitle: 'Khóa học default',
-    vfCode: 'courses',
+    vfTitle: 'Custom Render',
+    vfCode: 'custom-render',
     vfType: VfType.DATA,
-    vfAcutalField: 'courses',
-    vfActualFieldTitle: 'Khóa học',
+    vfAcutalField: 'id',
+    vfRenderFunc: (_row, _column, _index, _calFunc, value) => {
+      const strong = document.createElement('strong')
+      strong.style.color = '#F00'
+      strong.textContent = value
+      return `ID: ${strong.outerHTML}`
+    },
   },
+
+  // Template với enum mapping
   {
-    vfTitle: 'Khóa học dọc',
-    vfCode: 'courses2',
-    vfType: VfType.DATA,
-    vfAcutalField: 'courses',
-    vfActualFieldTitle: 'Khóa học',
-    templateShow: '<div>{{$item}}</div>',
-  },
-  {
-    vfTitle: 'Khóa học Func',
-    vfCode: 'coursesFunc',
-    vfType: VfType.DATA,
-    vfAcutalField: 'courses',
-    vfActualFieldTitle: 'Khóa học',
-    vfRenderFunc: (row: any) => {
-      return row.courses.join(' | ');
-    }
-  },
-  {
-    vfTitle: 'Điểm trung bình',
-    vfCode: 'gpa',
-    vfType: VfType.DATA,
-    vfAcutalField: 'GPA',
-    vfActualFieldTitle: 'Điểm trung bình',
-  },
-  {
-    vfTitle: 'ĐTB: {{value}}',
-    vfCode: 'gpa2',
-    vfType: VfType.DATA,
-    vfAcutalField: 'GPA',
-    vfActualFieldTitle: 'Điểm trung bình',
-    templateShow: 'ĐTB: {{value}}',
-  },
-  {
-    vfTitle: 'Trạng thái',
+    vfTitle: 'Status',
     vfCode: 'status',
     vfType: VfType.DATA,
     vfAcutalField: 'status',
     enum: {
       dropout: 'Thôi học',
       studying: 'Đang học',
-      graduate: 'Tốt nghiệp'
+      graduate: 'Tốt nghiệp',
     },
-    vfActualFieldTitle: 'Trạng thái',
   },
+
+  // Template với nested data
   {
-    vfTitle: 'Tỉnh/TP',
-    vfCode: 'provinceName',
+    vfTitle: 'Địa chỉ',
+    vfCode: 'address',
     vfType: VfType.DATA,
     vfAcutalField: 'address.provinceName',
-    vfActualFieldTitle: 'Tỉnh/TP',
   },
+
+  // Template với array data
   {
-    vfTitle: 'Quận/Huyện',
-    vfCode: 'districtName',
+    vfTitle: 'Khóa học',
+    vfCode: 'courses',
     vfType: VfType.DATA,
-    vfAcutalField: 'address.districtName',
-    vfActualFieldTitle: 'Quận/Huyện',
+    vfAcutalField: 'courses',
+    templateShow: '<div>{{$item}}</div>', // Hiển thị mỗi item trên một dòng
   },
-]);
-
-const actions: VfField[] = [
-  {
-    vfTitle: 'Xem',
-    vfCode: 'detail',
-    vfType: VfType.ACTION,
-    // vfAcutalField: 'detail',
-    vfActualFieldTitle: 'Xem',
-  },
-  {
-    vfTitle: 'Sửa',
-    vfCode: 'update',
-    vfType: VfType.ACTION,
-    // vfAcutalField: 'update',
-    vfActualFieldTitle: 'Sửa',
-  },
-  {
-    vfTitle: 'Xóa',
-    vfCode: 'delete',
-    vfType: VfType.ACTION,
-    // vfAcutalField: 'delete',
-    vfActualFieldTitle: 'Xóa',
-  },
-  {
-    vfTitle: 'Đổi giới tính',
-    vfCode: 'chagnegender',
-    vfType: VfType.ACTION,
-    // vfAcutalField: 'chagnegender',
-    vfActualFieldTitle: 'Đổi giới tính',
-  },
-];
-
-const icons: VfField[] = [
-  {
-    vfTitle: 'bookmark',
-    vfCode: 'bookmark',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'bookmark',
-    value: '/icons/bookmark.png',
-  },
-  {
-    vfTitle: 'envelope',
-    vfCode: 'envelope',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'envelope',
-    value: '/icons/envelope.png',
-  },
-  {
-    vfTitle: 'home',
-    vfCode: 'home',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'home',
-    value: '/icons/home.png',
-  },
-  {
-    vfTitle: 'marker',
-    vfCode: 'marker',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'marker',
-    value: '/icons/marker.png',
-  },
-  {
-    vfTitle: 'paper-plane',
-    vfCode: 'paper-plane',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'paper-plane',
-    value: '/icons/paper-plane.png',
-  },
-  {
-    vfTitle: 'phone-call',
-    vfCode: 'phone-call',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'phone-call',
-    value: '/icons/phone-call.png',
-  },
-  {
-    vfTitle: 'settings',
-    vfCode: 'settings',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'settings',
-    value: '/icons/settings.png',
-  },
-  {
-    vfTitle: 'star',
-    vfCode: 'star',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'star',
-    value: '/icons/star.png',
-  },
-  {
-    vfTitle: 'user',
-    vfCode: 'user',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'user',
-    value: '/icons/user.png',
-  },
-  {
-    vfTitle: 'users-alt',
-    vfCode: 'users-alt',
-    vfType: VfType.ICON,
-    // vfAcutalField: '',
-    vfActualFieldTitle: 'users-alt',
-    value: '/icons/users-alt.png',
-  },
-];
-
-const vfFieldsEdit = computed({
-  get(): string {
-    return JSON.stringify(vfFields.value, null, 2);
-  },
-  set(value: string) {
-    vfFields.value = JSON.parse(value);
-  }
-});
-
-const data = ref([
-  {
-    id: 1,
-    name: "Nguyễn Văn A",
-    age: 20,
-    gender: "Nam",
-    major: "Khoa học máy tính",
-    GPA: 3.5,
-    courses: ["Introduction to Programming", "Data Structures", "Algorithms"],
-    status: 'dropout',
-    address: {
-      prorinceId: 1,
-      provinceName: 'Hà Nội',
-      districtId: 1,
-      districtName: 'Hoàng Mai',
-    }
-  },
-  {
-    id: 2,
-    name: "Trần Thị B",
-    age: 21,
-    gender: "Nữ",
-    major: "Kinh doanh",
-    GPA: 3.2,
-    courses: ["Marketing", "Accounting", "Business Communication"],
-    status: 'studying',
-    address: {
-      prorinceId: 1,
-      provinceName: 'Hà Nội',
-      districtId: 2,
-      districtName: 'Cầu Giấy',
-    }
-  },
-  {
-    id: 3,
-    name: "Lê Văn C",
-    age: 19,
-    gender: "Nam",
-    major: "Kỹ thuật điện",
-    GPA: 3.8,
-    courses: ["Circuit Theory", "Digital Electronics", "Power Systems"],
-    status: 'graduate',
-    address: {
-      prorinceId: 2,
-      provinceName: 'HCM',
-      districtId: 1,
-      districtName: 'Quận 1',
-    }
-  },
-  {
-    id: 4,
-    name: "Lê Văn D",
-    age: 19,
-    gender: "Nam",
-    major: "Kỹ thuật điện",
-    GPA: 3.8,
-    courses: ["Circuit Theory", "Digital Electronics", "Power Systems"],
-    status: 'graduate',
-    address: {
-      prorinceId: 2,
-      provinceName: 'HCM',
-      districtId: 1,
-      districtName: 'Quận 1',
-    }
-  },
-  {
-    id: 5,
-    name: "Lê Văn E",
-    age: 19,
-    gender: "Nam",
-    major: "Kỹ thuật điện",
-    GPA: 3.8,
-    courses: ["Circuit Theory", "Digital Electronics", "Power Systems"],
-    status: 'graduate',
-    address: {
-      prorinceId: 2,
-      provinceName: 'HCM',
-      districtId: 1,
-      districtName: 'Quận 1',
-    }
-  }
-]);
-
-const dataEdit = computed({
-  get(): string {
-    return JSON.stringify(data.value, null, 2);
-  },
-  set(value) {
-    data.value = JSON.parse(value);
-  }
-});
-
-const columns: Column[] = [ { "title": "Mã sinh viên", "fieldCodes": [ "idFun" ] }, { "title": "Họ và tên", "fieldCodes": [ "name", "space", "minus", "space", "detail" ] }, { "title": "Ngành học", "fieldCodes": [ "major", "newline", "gpa2" ] }, { "title": "Khóa học", "fieldCodes": [ "courses2" ] }, { "title": "Địa chỉ", "fieldCodes": [ "districtName", "space", "minus", "space", "provinceName" ] }, { "title": "Giới tính", "fieldCodes": [ "gender2", "newline", "age" ] }, { "title": "Trạng thái", "fieldCodes": [ "star", "space", "status" ] }, { "title": "Actions", "fieldCodes": [ "detail", "space", "vertical", "space", "update", "space", "vertical", "space", "delete", "newline", "chagnegender" ] } ];
-
-const columnsEdit = ref<Column[]>(
-  columns.map(column => {
-    return {
-      ...column,
-      isDrag: false,
-    }
-  })
-);
-
-const columnShow = computed (() => {
-  return columnsEdit.value.map(column => {
-    const { isDrag, ...columnInfo } = column;
-    return  columnInfo;
-  });
-});
-
-const actionSelects = ref<string[]>([]);
-const onCta = (action: string, row: any, index: number) => {
-  actionSelects.value.push(`Event: ${action} | index: ${index} | id: ${row.id}`);
-}
+]
 </script>
-
-<style lang="scss" scoped>
-pre {
-  margin: 0;
-  padding: 0;
-}
-
-.link {
-  color: blue;
-  cursor: pointer;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 3fr 1fr 1fr;
-
-  h4 {
-    margin-bottom: 10px;
-  }
-  
-  .grid-item + .grid-item {
-    margin-left: 10px;
-  }
-}
-
-.grid-2-col {
-  display: grid;
-  grid-template-columns: 4fr 1fr;
-
-  h4 {
-    margin-bottom: 10px;
-  }
-  
-  .grid-item {
-    .column-out {
-      overflow-y: auto;
-    }
-  }
-
-  .grid-item + .grid-item {
-    margin-left: 10px;
-  }
-}
-
-textarea {
-  resize: none;
-  width: calc(100% - 10px);
-  height: 400px;
-  outline-color: #DDD;
-  border: 1px solid #DDD;
-  border-radius: 5px;
-  padding: 5px;
-}
-
-.box {
-  &.column-out {
-    height: 100px;
-    padding: 10px;
-  }
-}
-</style>
 ```
 
-## Screenshoot
+### Custom Styling
 
-![Screenshot docs](./screenshot.png)
+```vue
+<template>
+  <FlexiTable
+    :templates="vfFields"
+    :label-presets="labelPresets"
+    :layouts="layouts"
+  />
+</template>
 
-## Author
+<script setup lang="ts">
+// Label presets cho styling
+const labelPresets: LabelPreset[] = [
+  {
+    name: 'Success',
+    style: {
+      color: '#155724',
+      backgroundColor: '#d4edda',
+      fontWeight: 'bold',
+      padding: '2px 8px',
+      borderRadius: '4px',
+    },
+  },
+  {
+    name: 'Warning',
+    style: {
+      color: '#856404',
+      backgroundColor: '#fff3cd',
+      fontWeight: 'bold',
+      padding: '2px 8px',
+      borderRadius: '4px',
+    },
+  },
+]
 
-Tanmv
+// Layout với custom styling
+const layouts = [
+  {
+    title: 'Styled Layout',
+    id: 'styled-layout',
+    columns: [
+      {
+        title: 'Status',
+        fieldCodes: ['status'],
+        type: ColumnType.DATA,
+        align: 'center',      // Căn giữa ngang
+        vAlign: 'middle',     // Căn giữa dọc
+        width: '120px',       // Chiều rộng cố định
+        minWidth: '100px',    // Chiều rộng tối thiểu
+        maxWidth: '150px',    // Chiều rộng tối đa
+      }
+    ],
+    labels: [
+      {
+        code: 'status-label',
+        title: 'Status',
+        style: {
+          fontSize: '13px',
+          color: 'red',
+          backgroundColor: '#f8f9fa',
+          padding: '4px 8px',
+          borderRadius: '4px',
+        },
+      },
+    ],
+  }
+]
+</script>
+```
 
-Email: [tanmv@mpos.vn](mailto:tanmv@mpos.vn)
+### Layout Management
 
-Telegram: [@tanmac](https://t.me/tanmac)
+```vue
+<template>
+  <FlexiTable
+    v-model="layoutId"
+    :layouts="layouts"
+    @save="onSaveHandle"
+    @remove="onRemoveHandle"
+    @setDefault="onSetDefaultHandle"
+  />
+</template>
 
-Skype: [trai_12a1](skype:trai_12a1?chat)
+<script setup lang="ts">
+// Layout persistence với localStorage
+const keyStore = 'flexi-layout'
+
+const onSaveHandle = (layout: LayoutTemplate, cb: () => void) => {
+  const saveId = layout.id
+  localStorage.setItem(`${keyStore}.${saveId}`, JSON.stringify(layout))
+  cb()
+}
+
+const onRemoveHandle = (id: string, cb: () => void) => {
+  localStorage.removeItem(`${keyStore}.${id}`)
+  cb()
+}
+
+const onSetDefaultHandle = (id: string, cb: () => void) => {
+  localStorage.setItem(`${keyStore}.default`, id)
+  layoutId.value = id
+  cb()
+}
+
+// Load layouts khi component mounted
+onMounted(() => {
+  // Load layouts từ localStorage
+  const savedLayouts = Object.keys(localStorage)
+    .filter(key => key.startsWith(keyStore))
+    .map(key => JSON.parse(localStorage.getItem(key) || '{}'))
+  
+  layouts.value.push(...savedLayouts)
+  
+  // Load default layout
+  const defaultId = localStorage.getItem(`${keyStore}.default`)
+  if (defaultId) {
+    layoutId.value = defaultId
+  }
+})
+</script>
+```
+
+### Complete Type Definitions
+
+```typescript
+// VfField type
+interface VfField {
+  vfTitle: string;
+  vfCode: string;
+  vfType: VfType;
+  vfAcutalField?: string;
+  vfActualFieldTitle?: string;
+  templateShow?: string;
+  vfRenderFunc?: (row: any, column?: VfField, index?: number, calFunc?: string, value?: any) => string;
+  enum?: { [key: string]: string };
+  value?: string;
+}
+
+// Column type
+interface Column {
+  title: string;
+  fieldCodes: string[];
+  type?: ColumnType;
+  sortField?: string;
+  align?: 'left' | 'center' | 'right';
+  vAlign?: 'top' | 'middle' | 'bottom';
+  width?: string;
+  minWidth?: string;
+  maxWidth?: string;
+  isDrag?: boolean;
+}
+
+// Layout template type
+interface LayoutTemplate {
+  title: string;
+  id: string;
+  isSystem?: boolean;
+  columns: Column[];
+  labels?: LabelField[];
+}
+
+// Label field type
+interface LabelField {
+  code: string;
+  title: string;
+  style?: { [key: string]: string };
+}
+
+// Label preset type
+interface LabelPreset {
+  name: string;
+  style: {
+    color?: string;
+    backgroundColor?: string;
+    fontWeight?: string;
+    fontStyle?: string;
+    textDecoration?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+// Enums
+enum VfType {
+  DATA = 'DATA',
+  ACTION = 'ACTION',
+  ICON = 'ICON',
+  LABEL = 'LABEL'
+}
+
+enum ColumnType {
+  DATA = 'DATA',
+  SELECT = 'SELECT'
+}
+```

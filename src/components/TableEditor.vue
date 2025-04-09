@@ -26,6 +26,16 @@
                   <button class="btn-more" :disabled="disabled">⋯</button>
                   <template #content>
                     <div class="popover-action">
+                      <!-- Column type - Move to top -->
+                      <div style="margin-bottom: 8px" class="div-input">
+                        <label class="label">Column type:</label>
+                        <select v-model="element.type" @change="handleColumnTypeChange(element)">
+                          <option :value="ColumnType.DATA">Data</option>
+                          <option :value="ColumnType.SELECT">Select</option>
+                        </select>
+                      </div>
+
+                      <!-- Horizontal Align -->
                       <div>
                         <button class="btn-more" :class="{active: (element.align || 'left') === 'left'}" @click="element.align = 'left'">
                           <img :src="AlignLeftIcon" />
@@ -37,6 +47,8 @@
                           <img :src="AlignRightIcon" />
                         </button>
                       </div>
+
+                      <!-- Vertical Align -->
                       <div style="margin-top: 4px">
                         <button class="btn-more" :class="{active: (element.vAlign || 'top') === 'top'}" @click="element.vAlign = 'top'">
                           <img :src="VerticalAlignTopIcon" />
@@ -49,22 +61,42 @@
                         </button>
                       </div>
 
+                      <!-- Width settings -->
                       <div style="margin-top: 4px" class="div-input">
-                        <label class="label">width:</label> <input type="text" v-model="element.width" placeholder="# px | %"/>
+                        <label class="label">width:</label>
+                        <input type="text" v-model="element.width" placeholder="# px | %"/>
                       </div>
                       <div style="margin-top: 4px" class="div-input">
-                        <label class="label">min-width:</label> <input type="text" v-model="element.minWidth" placeholder="# px | %"/>
+                        <label class="label">min-width:</label>
+                        <input type="text" v-model="element.minWidth" placeholder="# px | %"/>
                       </div>
                       <div style="margin-top: 4px" class="div-input">
-                        <label class="label">max-width:</label> <input type="text" v-model="element.maxWidth" placeholder="# px | %"/>
+                        <label class="label">max-width:</label>
+                        <input type="text" v-model="element.maxWidth" placeholder="# px | %"/>
                       </div>
+
+                      <!-- Sort option - chỉ hiển thị khi không phải SELECT -->
+                      <template v-if="element.type !== ColumnType.SELECT">
+                        <div style="margin-top: 4px" class="div-input">
+                          <label class="label">Sort by field:</label>
+                          <select v-model="element.sortField">
+                            <option value="">No sort</option>
+                            <option v-for="field in sortableFields" 
+                              :key="field.vfAcutalField" 
+                              :value="field.vfAcutalField"
+                            >
+                              {{ field.vfActualFieldTitle }}
+                            </option>
+                          </select>
+                        </div>
+                      </template>
                     </div>
                   </template>
                 </Popper>
                 
                 <input :disabled="disabled" class="input-title" type="text" v-model="element.title" placeholder="Column name"/>
               </div>
-              <ul class="list-selected-field">
+              <ul v-if="element.type !== ColumnType.SELECT" class="list-selected-field">
                 <li v-for="vfCode in element.fieldCodes" :key="vfCode">
                   <img v-if="mapFieldInfo[vfCode]?.vfType === VfType.ICON" class="icon-selected":src="mapFieldInfo[vfCode]?.value" />
                   <span v-else>{{ mapFieldInfo[vfCode]?.vfTitle }}</span>
@@ -82,10 +114,28 @@
       </div>
 
       <div class="edit-columns">
-        <h5>Fields</h5>
+        <div class="justify-content-space-between">
+          <h5>Fields</h5>
+          <div class="search-field">
+            <input 
+              type="text" 
+              v-model="searchFieldText" 
+              placeholder="Tìm kiếm..." 
+              class="search-input"
+            />
+            <button 
+              v-if="searchFieldText"
+              class="btn-clear" 
+              @click="searchFieldText = ''"
+              title="Xóa tìm kiếm"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
         <hr style="margin: 5px 0"/>
         <ul class="list-field custom-scroll">
-          <li v-for="field in listFields" :key="field.field">
+          <li v-for="field in filteredFields" :key="field.field">
             <div class="label">{{ field.title }}:</div>
             <div class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, vfield)" v-for="vfield in field.variants" :key="vfield.vfCode" @dblclick="onAddingField(vfield)"> {{ vfield.vfTitle }} </div>
           </li>
@@ -94,56 +144,66 @@
 
       <div class="edit-columns etc-field custom-scroll">
         <div>
-          <div class="justify-content-space-between">
+          <div class="justify-content-space-between section-header" @click="toggleSection('labels')">
             <h5> Labels </h5>
-            <div>
-              <button class="btn-plus" :disabled="disabled" @click="onAddLabel">✚</button>
-              <!-- <Popper placement="left-start" arrow class="popper-wrapper">
-                <button class="btn-plus btn-more" :disabled="disabled" @click="onAddLabel">✚</button>
-                <template #content>
-                  <div class="popover-action">
-                    more
-                  </div>
-                </template>
-              </Popper> -->
+            <div class="section-actions">
+              <button class="btn-plus" :disabled="disabled" @click.stop="onAddLabel">✚</button>
+              <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.labels }">▼</span>
             </div>
           </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in labelsTransform" :key="field.vfCode">
-              <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.labels">
+            <ul class="list-field-symbol">
+              <li v-for="field in labelsTransform" :key="field.vfCode">
+                <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div style="margin-top: 10px">
-          <h5>Actions</h5>
+          <div class="justify-content-space-between section-header" @click="toggleSection('actions')">
+            <h5>Actions</h5>
+            <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.actions }">▼</span>
+          </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in actions" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.actions">
+            <ul class="list-field-symbol">
+              <li v-for="field in actions" :key="field.vfAcutalField">
+                <div @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div style="margin-top: 10px">
-          <h5>Separator</h5>
+          <div class="justify-content-space-between section-header" @click="toggleSection('separator')">
+            <h5>Separator</h5>
+            <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.separator }">▼</span>
+          </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in symbols" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.separator">
+            <ul class="list-field-symbol">
+              <li v-for="field in symbols" :key="field.vfAcutalField">
+                <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div style="margin-top: 10px">
-          <h5>Icons</h5>
+          <div class="justify-content-space-between section-header" @click="toggleSection('icons')">
+            <h5>Icons</h5>
+            <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.icons }">▼</span>
+          </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in icons" :key="field.vfAcutalField">
-              <img @dblclick="onAddingField(field)" :src="field.value" class="icon" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"/>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.icons">
+            <ul class="list-field-symbol">
+              <li v-for="field in icons" :key="field.vfAcutalField">
+                <img @dblclick="onAddingField(field)" :src="field.value" class="icon" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"/>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -161,7 +221,7 @@ import { computed, ref } from 'vue';
 import { VueDraggableNext as draggable } from "vue-draggable-next";
 import Popper from "vue3-popper";
 import { toJson } from '@/utils/parse';
-import { VfField, VariantsField, Column, VfType, LabelField, LabelPreset } from '@/interfaces/table';
+import { VfField, VariantsField, Column, VfType, LabelField, LabelPreset, ColumnType, SortConfig } from '@/interfaces/table';
 import type { CSSProperties } from 'vue';
 import { symbols } from '@/constants/symbols';
 import AlignLeftIcon from '@/assets/icons/align-left.svg';
@@ -262,6 +322,29 @@ const listFields = computed<VariantsField[]>(() => {
   return list;
 });
 
+const searchFieldText = ref('')
+
+const filteredFields = computed<VariantsField[]>(() => {
+  if (!searchFieldText.value) return listFields.value
+  
+  const searchLower = searchFieldText.value.toLowerCase()
+  
+  return listFields.value.filter(field => {
+    // Kiểm tra title của field
+    if (field.title.toLowerCase().includes(searchLower)) return true
+    
+    // Kiểm tra các variants
+    return field.variants.some(variant => {
+      return (
+        variant.vfCode.toLowerCase().includes(searchLower) ||
+        variant.vfTitle.toLowerCase().includes(searchLower) ||
+        (variant.vfAcutalField && variant.vfAcutalField.toLowerCase().includes(searchLower)) ||
+        (variant.vfActualFieldTitle && variant.vfActualFieldTitle.toLowerCase().includes(searchLower))
+      )
+    })
+  })
+})
+
 const onAddColumn = () => {
   emit('update:modelValue', [
     ...props.modelValue,
@@ -269,6 +352,7 @@ const onAddColumn = () => {
       title: '',
       fieldCodes: [],
       isDrag: false,
+      type: ColumnType.DATA,
     }
   ]);
 };
@@ -277,32 +361,32 @@ const onDragstart = (e: any, field: VfField) => {
   e.dataTransfer.setData("text", JSON.stringify(field));
 }
 
-const onDragover = (e: any, colum: Column,) => {
+const onDragover = (e: any, column: Column) => {
+  if (props.disabled || column.type === ColumnType.SELECT) {
+    return false;
+  }
+  e.preventDefault();
+  column.isDrag = true;
+}
+
+const onDragleave = (e: any, column: Column) => {
   if (props.disabled) {
     return false;
   }
   e.preventDefault();
-  colum.isDrag = true;
+  column.isDrag = false;
 }
 
-const onDragleave = (e: any, colum: Column,) => {
-  if (props.disabled) {
-    return false;
-  }
-  e.preventDefault();
-  colum.isDrag = false;
-}
-
-const onDrop = (e: any, colum: Column, index: number) => {
-  if (props.disabled) {
+const onDrop = (e: any, column: Column, index: number) => {
+  if (props.disabled || column.type === ColumnType.SELECT) {
     return false;
   }
   e.preventDefault();
   const data = toJson(e.dataTransfer.getData("text"));
   if (data && data.vfCode) {
-    colum.fieldCodes.push(data.vfCode);
+    column.fieldCodes.push(data.vfCode);
   }
-  colum.isDrag = false;
+  column.isDrag = false;
 
   activeIndex.value = index;
 }
@@ -360,6 +444,36 @@ const handleSaveLabel = (data: LabelField) => {
   }
   emit('update:labels', labelsEdit.value)
 }
+
+const isSectionOpen = ref({
+  labels: true,
+  actions: true,
+  separator: true,
+  icons: true
+})
+
+const toggleSection = (section: keyof typeof isSectionOpen.value) => {
+  isSectionOpen.value[section] = !isSectionOpen.value[section]
+}
+
+const sortableFields = computed(() => {
+  const fieldMap = new Map<string, VfField>();
+  props.vfFields.forEach((field: VfField) => {
+    if (field.vfAcutalField && !fieldMap.has(field.vfAcutalField)) {
+      fieldMap.set(field.vfAcutalField, field);
+    }
+  });
+  return Array.from(fieldMap.values());
+});
+
+const handleColumnTypeChange = (column: Column) => {
+  if (column.type === ColumnType.SELECT) {
+    // Chỉ reset các thuộc tính liên quan đến sort và field codes
+    column.fieldCodes = [];
+    column.sortField = undefined;
+    // Không reset align và các thuộc tính khác
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -622,15 +736,92 @@ ul.list-group {
   .div-input {
     display: flex;
     .label {
-      width: 90px;
+      width: 90px !important;
       margin-right: 10px;
     }
-    input[type="text"] {
-      width: 55px;
+    input[type="text"], select {
+      width: 120px;
       outline: none;
       border: 1px solid #AAA;
       border-radius: 3px;
+      padding: 2px;
+    }
+    select {
+      width: 126px !important;
     }
   }
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  position: relative;
+  
+  .search-input {
+    padding: 2px 8px;
+    padding-right: 28px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    width: 150px;
+    outline: none;
+    color: #666;
+  }
+
+  .btn-clear {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    cursor: pointer;
+    color: #999;
+    font-size: 12px;
+    line-height: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14x;
+    height: 14px;
+
+    &:hover {
+      background-color: #f5f5f5;
+      color: #666;
+    }
+  }
+}
+
+.section-header {
+  cursor: pointer;
+  user-select: none;
+  
+  &:hover {
+    .collapse-icon {
+      color: #2320d3;
+    }
+  }
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.collapse-icon {
+  font-size: 10px;
+  color: #999;
+  transition: transform 0.2s;
+  
+  &.collapsed {
+    transform: rotate(-90deg);
+  }
+}
+
+.section-content {
+  transition: all 0.2s;
 }
 </style>
