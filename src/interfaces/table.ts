@@ -52,17 +52,27 @@ export interface LayoutTemplate {
   labels?: LabelField[];
 }
 
+export enum ColumnType {
+  DATA = 'DATA',
+  SELECT = 'SELECT'
+}
+
+export interface SortConfig {
+  field: string; // vfActualField hoặc vfActualFieldTitle để sort
+  direction?: 'asc' | 'desc';
+}
+
 export interface Column {
   title: string;
   fieldCodes: string[];
+  isDrag?: boolean;
+  type?: ColumnType;
+  align?: 'left' | 'center' | 'right';
+  vAlign?: 'top' | 'middle' | 'bottom';
   width?: string;
   minWidth?: string;
   maxWidth?: string;
-  align?: "left" | "center" | "right";
-  vAlign?: "top" | "middle" | "bottom";
-  cssHeader?: string;
-  cssValue?: string;
-  isDrag?: boolean;
+  sortField?: string;
 }
 
 export interface LabelPreset {

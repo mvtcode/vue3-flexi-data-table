@@ -2,15 +2,52 @@
   <div class="wrapper-table custom-scroll" :class="{fixed: fixed}" :style="{height: fixed ? `${height}px`: 'auto'}">
     <table class="dynamic-table">
       <thead>
-        <tr >
-          <th v-for="(column, index) in columns" :key="index" :class="{'drag-over': column.isDrag}"> {{ column.title }}</th>
+        <tr>
+          <th v-for="(column, index) in columns" 
+            :key="index" 
+            :class="{
+              'drag-over': column.isDrag,
+              'select-column': column.type === ColumnType.SELECT,
+              'sortable': column.sortField
+            }"
+            @click="handleHeaderClick(column)"
+          >
+            <template v-if="column.type === ColumnType.SELECT">
+              <input 
+                type="checkbox" 
+                :checked="selectedRows.length === (data?.length || 0)"
+                :indeterminate="selectedRows.length > 0 && selectedRows.length < (data?.length || 0)"
+                @change="toggleSelectAll"
+                @click.stop
+              />
+            </template>
+            <div v-else class="header-content">
+              {{ column.title }}
+              <span v-if="column.sortField && column.sortField === currentSortField" class="sort-icon">
+                {{ currentSortDirection === 'asc' ? '▲' : (currentSortDirection === 'desc' ? '▼' : '') }}
+              </span>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
         <template v-if="(data?.length || 0) > 0">
           <tr v-for="(row, index) in data" :key="index">
-            <td v-for="(column, index2) in columns" :key="index2" :class="{'drag-over': column.isDrag}" :style="getStyleColumn(column)">
-              <div class="td-line" v-html="getValue(row, column, index)" />
+            <td v-for="(column, index2) in columns" 
+              :key="index2" 
+              :class="{
+                'drag-over': column.isDrag,
+              }" 
+              :style="getStyleColumn(column)"
+            >
+              <template v-if="column.type === ColumnType.SELECT">
+                <input 
+                  type="checkbox" 
+                  :checked="selectedRows.includes(index)"
+                  @change="toggleSelectRow(index)"
+                />
+              </template>
+              <div v-else class="td-line" v-html="getValue(row, column, index)" />
             </td>
           </tr>
         </template>
@@ -27,8 +64,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties } from "vue";
-import { Column, LabelField, VfField, VfType, LabelStyle } from '@/interfaces/table';
+import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties, defineExpose } from "vue";
+import { Column, LabelField, VfField, VfType, LabelStyle, ColumnType } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 
@@ -56,6 +93,8 @@ interface FlattenedObject {
 
 const emit = defineEmits<{
   (e: "onCta", action: string, row: any, index: number): void;
+  (e: "selectChange", selectedRows: number[]): void;
+  (e: "sortChange", sort: { field?: string; direction?: 'asc' | 'desc' }): void;
 }>();
 
 const prefixFunction = 'tdac';
@@ -104,7 +143,7 @@ const render = (template: string, values: {[key: string]: any}): string => {
 const getStyleColumn = computed(() => {
   return (column: Column) => {
     const style: {[key: string]: string} = {
-      'text-align': (column.align || 'left'),
+      'text-align': column.align || 'left',
       'vertical-align': (column.vAlign || 'top')
     }
     column.width && (style.width = column.width);
@@ -246,6 +285,77 @@ const getValue = computed(() => {
     return values.join('');
   }
 });
+
+// Thêm state cho selected rows
+const selectedRows = ref<number[]>([]);
+
+// Thêm state để quản lý sort direction
+const currentSortField = ref<string>();
+const currentSortDirection = ref<'asc' | 'desc'>();
+
+// Xử lý select/deselect row
+const toggleSelectRow = (index: number) => {
+  const position = selectedRows.value.indexOf(index);
+  if (position > -1) {
+    selectedRows.value.splice(position, 1);
+  } else {
+    selectedRows.value.push(index);
+  }
+  emit('selectChange', selectedRows.value);
+};
+
+// Xử lý select/deselect all
+const toggleSelectAll = () => {
+  if (selectedRows.value.length === props.data.length) {
+    selectedRows.value = [];
+  } else {
+    selectedRows.value = props.data.map((_, index) => index);
+  }
+  emit('selectChange', selectedRows.value);
+};
+
+// Thêm hàm xử lý click header
+const handleHeaderClick = (column: Column) => {
+  // Bỏ qua nếu là cột SELECT hoặc không có sortField
+  if (column.type === ColumnType.SELECT || !column.sortField) return;
+  
+  if (currentSortField.value !== column.sortField) {
+    // Nếu click column mới, reset và sort asc
+    currentSortField.value = column.sortField;
+    currentSortDirection.value = 'asc';
+  } else {
+    // Nếu click lại column đang sort
+    if (currentSortDirection.value === 'asc') {
+      currentSortDirection.value = 'desc';
+    } else if (currentSortDirection.value === 'desc') {
+      // Reset về không sort
+      currentSortField.value = undefined;
+      currentSortDirection.value = undefined;
+    } else {
+      // Từ không sort -> asc
+      currentSortDirection.value = 'asc';
+    }
+  }
+
+  // Emit sự kiện sort change
+  emit('sortChange', {
+    field: currentSortField.value,
+    direction: currentSortDirection.value
+  });
+};
+
+// Expose method getSelect
+defineExpose({
+  getSelect: () => selectedRows.value,
+  setSelect: (indexes: number[]) => {
+    selectedRows.value = indexes;
+    emit('selectChange', selectedRows.value);
+  },
+  clearSelect: () => {
+    selectedRows.value = [];
+    emit('selectChange', selectedRows.value);
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -255,5 +365,39 @@ const getValue = computed(() => {
 
 .icon {
   height: 18px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+  
+  .sort-icon {
+    font-size: 10px;
+    color: #666;
+  }
+}
+
+th {
+  position: relative;
+  
+  &.sortable {
+    cursor: pointer;
+    
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+  
+  input[type="checkbox"] {
+    margin: 0;
+  }
+}
+
+td {
+  input[type="checkbox"] {
+    margin: 0;
+  }
 }
 </style>

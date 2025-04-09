@@ -26,6 +26,16 @@
                   <button class="btn-more" :disabled="disabled">⋯</button>
                   <template #content>
                     <div class="popover-action">
+                      <!-- Column type - Move to top -->
+                      <div style="margin-bottom: 8px" class="div-input">
+                        <label class="label">Column type:</label>
+                        <select v-model="element.type" @change="handleColumnTypeChange(element)">
+                          <option :value="ColumnType.DATA">Data</option>
+                          <option :value="ColumnType.SELECT">Select</option>
+                        </select>
+                      </div>
+
+                      <!-- Horizontal Align -->
                       <div>
                         <button class="btn-more" :class="{active: (element.align || 'left') === 'left'}" @click="element.align = 'left'">
                           <img :src="AlignLeftIcon" />
@@ -37,6 +47,8 @@
                           <img :src="AlignRightIcon" />
                         </button>
                       </div>
+
+                      <!-- Vertical Align -->
                       <div style="margin-top: 4px">
                         <button class="btn-more" :class="{active: (element.vAlign || 'top') === 'top'}" @click="element.vAlign = 'top'">
                           <img :src="VerticalAlignTopIcon" />
@@ -49,22 +61,42 @@
                         </button>
                       </div>
 
+                      <!-- Width settings -->
                       <div style="margin-top: 4px" class="div-input">
-                        <label class="label">width:</label> <input type="text" v-model="element.width" placeholder="# px | %"/>
+                        <label class="label">width:</label>
+                        <input type="text" v-model="element.width" placeholder="# px | %"/>
                       </div>
                       <div style="margin-top: 4px" class="div-input">
-                        <label class="label">min-width:</label> <input type="text" v-model="element.minWidth" placeholder="# px | %"/>
+                        <label class="label">min-width:</label>
+                        <input type="text" v-model="element.minWidth" placeholder="# px | %"/>
                       </div>
                       <div style="margin-top: 4px" class="div-input">
-                        <label class="label">max-width:</label> <input type="text" v-model="element.maxWidth" placeholder="# px | %"/>
+                        <label class="label">max-width:</label>
+                        <input type="text" v-model="element.maxWidth" placeholder="# px | %"/>
                       </div>
+
+                      <!-- Sort option - chỉ hiển thị khi không phải SELECT -->
+                      <template v-if="element.type !== ColumnType.SELECT">
+                        <div style="margin-top: 4px" class="div-input">
+                          <label class="label">Sort by field:</label>
+                          <select v-model="element.sortField">
+                            <option value="">No sort</option>
+                            <option v-for="field in sortableFields" 
+                              :key="field.vfAcutalField" 
+                              :value="field.vfAcutalField"
+                            >
+                              {{ field.vfActualFieldTitle }}
+                            </option>
+                          </select>
+                        </div>
+                      </template>
                     </div>
                   </template>
                 </Popper>
                 
                 <input :disabled="disabled" class="input-title" type="text" v-model="element.title" placeholder="Column name"/>
               </div>
-              <ul class="list-selected-field">
+              <ul v-if="element.type !== ColumnType.SELECT" class="list-selected-field">
                 <li v-for="vfCode in element.fieldCodes" :key="vfCode">
                   <img v-if="mapFieldInfo[vfCode]?.vfType === VfType.ICON" class="icon-selected":src="mapFieldInfo[vfCode]?.value" />
                   <span v-else>{{ mapFieldInfo[vfCode]?.vfTitle }}</span>
@@ -189,7 +221,7 @@ import { computed, ref } from 'vue';
 import { VueDraggableNext as draggable } from "vue-draggable-next";
 import Popper from "vue3-popper";
 import { toJson } from '@/utils/parse';
-import { VfField, VariantsField, Column, VfType, LabelField, LabelPreset } from '@/interfaces/table';
+import { VfField, VariantsField, Column, VfType, LabelField, LabelPreset, ColumnType, SortConfig } from '@/interfaces/table';
 import type { CSSProperties } from 'vue';
 import { symbols } from '@/constants/symbols';
 import AlignLeftIcon from '@/assets/icons/align-left.svg';
@@ -320,6 +352,7 @@ const onAddColumn = () => {
       title: '',
       fieldCodes: [],
       isDrag: false,
+      type: ColumnType.DATA,
     }
   ]);
 };
@@ -328,32 +361,32 @@ const onDragstart = (e: any, field: VfField) => {
   e.dataTransfer.setData("text", JSON.stringify(field));
 }
 
-const onDragover = (e: any, colum: Column,) => {
+const onDragover = (e: any, column: Column) => {
+  if (props.disabled || column.type === ColumnType.SELECT) {
+    return false;
+  }
+  e.preventDefault();
+  column.isDrag = true;
+}
+
+const onDragleave = (e: any, column: Column) => {
   if (props.disabled) {
     return false;
   }
   e.preventDefault();
-  colum.isDrag = true;
+  column.isDrag = false;
 }
 
-const onDragleave = (e: any, colum: Column,) => {
-  if (props.disabled) {
-    return false;
-  }
-  e.preventDefault();
-  colum.isDrag = false;
-}
-
-const onDrop = (e: any, colum: Column, index: number) => {
-  if (props.disabled) {
+const onDrop = (e: any, column: Column, index: number) => {
+  if (props.disabled || column.type === ColumnType.SELECT) {
     return false;
   }
   e.preventDefault();
   const data = toJson(e.dataTransfer.getData("text"));
   if (data && data.vfCode) {
-    colum.fieldCodes.push(data.vfCode);
+    column.fieldCodes.push(data.vfCode);
   }
-  colum.isDrag = false;
+  column.isDrag = false;
 
   activeIndex.value = index;
 }
@@ -422,6 +455,25 @@ const isSectionOpen = ref({
 const toggleSection = (section: keyof typeof isSectionOpen.value) => {
   isSectionOpen.value[section] = !isSectionOpen.value[section]
 }
+
+const sortableFields = computed(() => {
+  const fieldMap = new Map<string, VfField>();
+  props.vfFields.forEach((field: VfField) => {
+    if (field.vfAcutalField && !fieldMap.has(field.vfAcutalField)) {
+      fieldMap.set(field.vfAcutalField, field);
+    }
+  });
+  return Array.from(fieldMap.values());
+});
+
+const handleColumnTypeChange = (column: Column) => {
+  if (column.type === ColumnType.SELECT) {
+    // Chỉ reset các thuộc tính liên quan đến sort và field codes
+    column.fieldCodes = [];
+    column.sortField = undefined;
+    // Không reset align và các thuộc tính khác
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -684,14 +736,18 @@ ul.list-group {
   .div-input {
     display: flex;
     .label {
-      width: 90px;
+      width: 90px !important;
       margin-right: 10px;
     }
-    input[type="text"] {
-      width: 55px;
+    input[type="text"], select {
+      width: 120px;
       outline: none;
       border: 1px solid #AAA;
       border-radius: 3px;
+      padding: 2px;
+    }
+    select {
+      width: 126px !important;
     }
   }
 }

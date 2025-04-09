@@ -29,6 +29,7 @@
 
       <!-- Settings button -->
       <div class="settings">
+        <slot name="actions"/>
         <button @click="showEdit">
           ⚙️
         </button>
@@ -37,6 +38,7 @@
 
     <!-- Table content -->
     <DynamicTable
+      ref="dynamicTableRef"
       :columns="selectedLayout?.columns || []"
       :labels="selectedLayout?.labels || []"
       :templates="[...templates, ...actions, ...icons]"
@@ -44,6 +46,8 @@
       :height="height"
       :fixed="fixed"
       @onCta="handleTableAction"
+      @selectChange="handleSelectChange"
+      @sortChange="handleSortChange"
     />
 
     <!-- Editor popup -->
@@ -130,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import DynamicTable from './DynamicTable.vue';
 import TableEditor from './TableEditor.vue';
 import { Column, VfField, LayoutTemplate, LabelPreset } from '@/interfaces/table';
@@ -168,6 +172,8 @@ const emit = defineEmits<{
   (e: 'save', layout: LayoutTemplate, callback: () => void): void;
   (e: 'remove', id: string, callback: () => void): void;
   (e: 'setDefault', id: string, callback: () => void): void;
+  (e: 'selectChange', selectedRows: number[]): void;
+  (e: 'sortChange', sortConfig: { field?: string; direction?: 'asc' | 'desc' }): void;
 }>();
 
 // State
@@ -289,8 +295,29 @@ const onSetDefaultHandle = () => {
 };
 // end edit
 
-onMounted(() => {
-  //
+const handleSelectChange = (selectedRows: number[]) => {
+  emit('selectChange', selectedRows);
+};
+
+const handleSortChange = (sortConfig: { field?: string; direction?: undefined | 'asc' | 'desc' }) => {
+  emit('sortChange', sortConfig);
+};
+
+const dynamicTableRef = ref<InstanceType<typeof DynamicTable>>();
+const getSelect = () => {
+  return dynamicTableRef.value?.getSelect();
+}
+const setSelect = (indexes: number[]) => {
+  dynamicTableRef.value?.setSelect(indexes);
+}
+const clearSelect = () => {
+  dynamicTableRef.value?.clearSelect();
+}
+
+defineExpose({
+  getSelect,
+  setSelect,
+  clearSelect
 });
 </script>
 
@@ -335,6 +362,20 @@ onMounted(() => {
             color: red;
           }
         }
+      }
+    }
+
+    .settings {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      button {
+        padding: 2px 6px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
       }
     }
   }
@@ -399,30 +440,6 @@ onMounted(() => {
           outline: none;
         }
       }
-
-      // .editor-footer {
-      //   margin-top: 1rem;
-      //   display: flex;
-      //   gap: 1rem;
-      //   justify-content: flex-end;
-
-      //   input {
-      //     padding: 0.5rem;
-      //     border: 1px solid #ddd;
-      //     border-radius: 4px;
-      //   }
-
-      //   button {
-      //     padding: 0.5rem 1rem;
-      //     border-radius: 4px;
-      //     cursor: pointer;
-
-      //     &:last-child {
-      //       background: white;
-      //       border: 1px solid #ddd;
-      //     }
-      //   }
-      // }
     }
   }
 
