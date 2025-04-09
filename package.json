@@ -1,7 +1,7 @@
 {
   "name": "vue3-flexi-data-table",
   "private": false,
-  "version": "0.1.23",
+  "version": "0.1.24",
   "author": "tanmv",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -9,10 +9,16 @@
   "module": "./dist/vue3-flexi-data-table.js",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/vue3-flexi-data-table.js",
       "require": "./dist/vue3-flexi-data-table.umd.cjs"
     },
-    "./components/TableEditor": "./src/components/TableEditor.vue",
+    "./dist/*": "./dist/*",
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.js",
+      "require": "./dist/components/*.cjs"
+    },
     "./style.css": "./dist/style.css"
   },
   "files": [
@@ -54,7 +60,7 @@
     "rimraf": "^5.0.5",
     "sass": "^1.72.0",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0",
+    "vite": "^5.2.6",
     "vite-plugin-dts": "^3.8.1",
     "vue-tsc": "^2.0.6"
   },

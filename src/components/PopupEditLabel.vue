@@ -101,6 +101,24 @@
         </div>
       </div>
 
+      <div class="input-group">
+        <label>Chiều rộng:</label>
+        <div class="width-input">
+          <input 
+            v-model="labelData.style!.width" 
+            type="text" 
+            class="width-value"
+            placeholder="auto"
+          >
+          <select v-model="labelData.style!.widthUnit" class="width-unit">
+            <option value="px">px</option>
+            <option value="%">%</option>
+            <option value="em">em</option>
+            <option value="rem">rem</option>
+          </select>
+        </div>
+      </div>
+
       <div class="actions">
         <button class="btn-cancel" @click="handleCancel">Hủy</button>
         <button class="btn-save" @click="handleSave" :disabled="!labelData.title">Lưu</button>
@@ -110,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, nextTick } from 'vue'
+import { ref, defineEmits, nextTick, watch } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import type { LabelField, LabelPreset } from '@/interfaces/table'
 
@@ -136,7 +154,9 @@ const labelData = ref<LabelField>({
     backgroundColor: '#ffffff',
     fontWeight: 'normal',
     fontStyle: 'normal',
-    textDecoration: 'none'
+    textDecoration: 'none',
+    width: 'auto',
+    widthUnit: 'px'
   }
 })
 
@@ -187,7 +207,9 @@ const show = (data?: LabelField) => {
         backgroundColor: data.style?.backgroundColor || 'transparent',
         fontWeight: data.style?.fontWeight || 'normal',
         fontStyle: data.style?.fontStyle || 'normal',
-        textDecoration: data.style?.textDecoration || 'none'
+        textDecoration: data.style?.textDecoration || 'none',
+        width: data.style?.width || 'auto',
+        widthUnit: data.style?.widthUnit || 'px'
       }
     }
   } else {
@@ -200,7 +222,9 @@ const show = (data?: LabelField) => {
         backgroundColor: 'transparent',
         fontWeight: 'normal',
         fontStyle: 'normal',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        width: 'auto',
+        widthUnit: 'px'
       }
     }
   }
@@ -369,6 +393,28 @@ defineExpose({
           &:hover {
             background-color: #f5f5f5;
           }
+        }
+      }
+
+      .width-input {
+        flex: 1;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        .width-value {
+          flex: 1;
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+
+        .width-unit {
+          width: 60px;
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          background-color: white;
         }
       }
     }

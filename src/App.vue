@@ -391,7 +391,7 @@ const defaultLayouts: LayoutTemplate[] = [
       { title: "Mã sinh viên", fieldCodes: ["idFun"] },
       {
         title: "Họ và tên",
-        fieldCodes: ["name", "space", "minus", "space", "detail"],
+        fieldCodes: ["detail-name-func"],
       },
       { title: "Ngành học", fieldCodes: ["major", "newline", "gpa2"] },
       { title: "Khóa học", fieldCodes: ["courses2"] },

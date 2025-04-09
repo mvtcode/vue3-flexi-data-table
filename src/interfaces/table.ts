@@ -1,5 +1,9 @@
 import type { CSSProperties } from 'vue';
 
+export interface LabelStyle extends CSSProperties {
+  widthUnit?: string;
+}
+
 export enum VfType {
   DATA = "DATA",
   SYMBOL = "SYMBOL",
@@ -36,7 +40,7 @@ export interface VariantsField {
 export interface LabelField {
   title: string;
   code: string;
-  style?: CSSProperties;
+  style?: LabelStyle;
 }
 
 export interface LayoutTemplate {

@@ -83,7 +83,7 @@
             <button :disabled="selectedLayoutEdit?.isSystem" @click="onDeleteHandle">
               Xóa
             </button>
-            <button :disabled="selectedLayoutEdit?.isSystem" @click="onSaveHandle">
+            <button :disabled="selectedLayoutEdit?.isSystem" @click="showSaveDialog">
               Lưu
             </button>
             <button :disabled="!selectedLayoutEdit?.isSave || selectedLayoutEdit?.id === selectedLayoutId" @click="onSetDefaultHandle">
@@ -102,6 +102,27 @@
             :label-presets="labelPresets"
             @error="handleEditorError"
           />
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Dialog -->
+    <div v-if="isShowSaveDialog" class="save-dialog">
+      <div class="dialog-overlay" @click="isShowSaveDialog = false"></div>
+      <div class="dialog-content">
+        <h3>Lưu Layout</h3>
+        <div class="form-group">
+          <label>Tên Layout:</label>
+          <input 
+            v-model="newLayoutTitle" 
+            type="text" 
+            placeholder="Nhập tên layout"
+            @keyup.enter="onSaveHandle"
+          >
+        </div>
+        <div class="dialog-actions">
+          <button @click="isShowSaveDialog = false">Hủy</button>
+          <button @click="onSaveHandle" :disabled="!newLayoutTitle">Lưu</button>
         </div>
       </div>
     </div>
@@ -235,11 +256,31 @@ const onDeleteHandle = () => {
   }
 };
 
+const isShowSaveDialog = ref(false);
+const newLayoutTitle = ref('');
+
+const showSaveDialog = () => {
+  isShowSaveDialog.value = true;
+  newLayoutTitle.value = selectedLayoutEdit.value?.title || '';
+};
+
 const onSaveHandle = () => {
+  if (!newLayoutTitle.value) return;
+  
   const saveLayout = JSON.parse(JSON.stringify(selectedLayoutEdit.value));
   delete saveLayout.isSave;
+  saveLayout.title = newLayoutTitle.value;
+  
   emit('save', saveLayout as LayoutTemplate, () => {
-    selectedLayoutEdit.value && (selectedLayoutEdit.value.isSave = true);
+    // Cập nhật lại danh sách layouts
+    const index = layoutsEdit.value.findIndex(layout => layout.id === saveLayout.id);
+    if (index !== -1) {
+      layoutsEdit.value[index] = {
+        ...saveLayout,
+        isSave: true
+      };
+    }
+    isShowSaveDialog.value = false;
   });
 };
 
@@ -325,7 +366,7 @@ onMounted(() => {
       padding: 0.5rem;
       overflow-y: auto;
       min-width: 800px;
-      max-width: 90vw;
+      width: 90vw;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
@@ -382,6 +423,88 @@ onMounted(() => {
       //     }
       //   }
       // }
+    }
+  }
+
+  .save-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .dialog-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .dialog-content {
+      position: relative;
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-width: 300px;
+
+      h3 {
+        margin: 0 0 1rem 0;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+        }
+
+        input {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          outline: none;
+
+          &:focus {
+            border-color: #4a90e2;
+          }
+        }
+      }
+
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+
+        button {
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+
+          &:first-child {
+            background: white;
+            border: 1px solid #ddd;
+          }
+
+          &:last-child {
+            background: #4a90e2;
+            color: white;
+            border: none;
+
+            &:disabled {
+              background: #ccc;
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
     }
   }
 }

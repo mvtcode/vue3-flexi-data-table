@@ -82,10 +82,28 @@
       </div>
 
       <div class="edit-columns">
-        <h5>Fields</h5>
+        <div class="justify-content-space-between">
+          <h5>Fields</h5>
+          <div class="search-field">
+            <input 
+              type="text" 
+              v-model="searchFieldText" 
+              placeholder="Tìm kiếm..." 
+              class="search-input"
+            />
+            <button 
+              v-if="searchFieldText"
+              class="btn-clear" 
+              @click="searchFieldText = ''"
+              title="Xóa tìm kiếm"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
         <hr style="margin: 5px 0"/>
         <ul class="list-field custom-scroll">
-          <li v-for="field in listFields" :key="field.field">
+          <li v-for="field in filteredFields" :key="field.field">
             <div class="label">{{ field.title }}:</div>
             <div class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, vfield)" v-for="vfield in field.variants" :key="vfield.vfCode" @dblclick="onAddingField(vfield)"> {{ vfield.vfTitle }} </div>
           </li>
@@ -94,56 +112,66 @@
 
       <div class="edit-columns etc-field custom-scroll">
         <div>
-          <div class="justify-content-space-between">
+          <div class="justify-content-space-between section-header" @click="toggleSection('labels')">
             <h5> Labels </h5>
-            <div>
-              <button class="btn-plus" :disabled="disabled" @click="onAddLabel">✚</button>
-              <!-- <Popper placement="left-start" arrow class="popper-wrapper">
-                <button class="btn-plus btn-more" :disabled="disabled" @click="onAddLabel">✚</button>
-                <template #content>
-                  <div class="popover-action">
-                    more
-                  </div>
-                </template>
-              </Popper> -->
+            <div class="section-actions">
+              <button class="btn-plus" :disabled="disabled" @click.stop="onAddLabel">✚</button>
+              <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.labels }">▼</span>
             </div>
           </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in labelsTransform" :key="field.vfCode">
-              <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.labels">
+            <ul class="list-field-symbol">
+              <li v-for="field in labelsTransform" :key="field.vfCode">
+                <div @click="!disabled && onEditLabel(field)" :style="getStyleLabel(field)" @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div style="margin-top: 10px">
-          <h5>Actions</h5>
+          <div class="justify-content-space-between section-header" @click="toggleSection('actions')">
+            <h5>Actions</h5>
+            <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.actions }">▼</span>
+          </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in actions" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.actions">
+            <ul class="list-field-symbol">
+              <li v-for="field in actions" :key="field.vfAcutalField">
+                <div @dblclick="onAddingField(field)" class="item btn" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div style="margin-top: 10px">
-          <h5>Separator</h5>
+          <div class="justify-content-space-between section-header" @click="toggleSection('separator')">
+            <h5>Separator</h5>
+            <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.separator }">▼</span>
+          </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in symbols" :key="field.vfAcutalField">
-              <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.separator">
+            <ul class="list-field-symbol">
+              <li v-for="field in symbols" :key="field.vfAcutalField">
+                <div @dblclick="onAddingField(field)" class="item" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"> {{ field.vfTitle }} </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div style="margin-top: 10px">
-          <h5>Icons</h5>
+          <div class="justify-content-space-between section-header" @click="toggleSection('icons')">
+            <h5>Icons</h5>
+            <span class="collapse-icon" :class="{ 'collapsed': !isSectionOpen.icons }">▼</span>
+          </div>
           <hr style="margin: 5px 0"/>
-          <ul class="list-field-symbol">
-            <li v-for="field in icons" :key="field.vfAcutalField">
-              <img @dblclick="onAddingField(field)" :src="field.value" class="icon" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"/>
-            </li>
-          </ul>
+          <div class="section-content" v-show="isSectionOpen.icons">
+            <ul class="list-field-symbol">
+              <li v-for="field in icons" :key="field.vfAcutalField">
+                <img @dblclick="onAddingField(field)" :src="field.value" class="icon" :class="{disabled: disabled}" draggable="true" @dragstart="e => onDragstart(e, field)"/>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -262,6 +290,29 @@ const listFields = computed<VariantsField[]>(() => {
   return list;
 });
 
+const searchFieldText = ref('')
+
+const filteredFields = computed<VariantsField[]>(() => {
+  if (!searchFieldText.value) return listFields.value
+  
+  const searchLower = searchFieldText.value.toLowerCase()
+  
+  return listFields.value.filter(field => {
+    // Kiểm tra title của field
+    if (field.title.toLowerCase().includes(searchLower)) return true
+    
+    // Kiểm tra các variants
+    return field.variants.some(variant => {
+      return (
+        variant.vfCode.toLowerCase().includes(searchLower) ||
+        variant.vfTitle.toLowerCase().includes(searchLower) ||
+        (variant.vfAcutalField && variant.vfAcutalField.toLowerCase().includes(searchLower)) ||
+        (variant.vfActualFieldTitle && variant.vfActualFieldTitle.toLowerCase().includes(searchLower))
+      )
+    })
+  })
+})
+
 const onAddColumn = () => {
   emit('update:modelValue', [
     ...props.modelValue,
@@ -359,6 +410,17 @@ const handleSaveLabel = (data: LabelField) => {
     labelsEdit.value.push(data)
   }
   emit('update:labels', labelsEdit.value)
+}
+
+const isSectionOpen = ref({
+  labels: true,
+  actions: true,
+  separator: true,
+  icons: true
+})
+
+const toggleSection = (section: keyof typeof isSectionOpen.value) => {
+  isSectionOpen.value[section] = !isSectionOpen.value[section]
 }
 </script>
 
@@ -632,5 +694,78 @@ ul.list-group {
       border-radius: 3px;
     }
   }
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  position: relative;
+  
+  .search-input {
+    padding: 2px 8px;
+    padding-right: 28px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    width: 150px;
+    outline: none;
+    color: #666;
+  }
+
+  .btn-clear {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    cursor: pointer;
+    color: #999;
+    font-size: 12px;
+    line-height: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14x;
+    height: 14px;
+
+    &:hover {
+      background-color: #f5f5f5;
+      color: #666;
+    }
+  }
+}
+
+.section-header {
+  cursor: pointer;
+  user-select: none;
+  
+  &:hover {
+    .collapse-icon {
+      color: #2320d3;
+    }
+  }
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.collapse-icon {
+  font-size: 10px;
+  color: #999;
+  transition: transform 0.2s;
+  
+  &.collapsed {
+    transform: rotate(-90deg);
+  }
+}
+
+.section-content {
+  transition: all 0.2s;
 }
 </style>

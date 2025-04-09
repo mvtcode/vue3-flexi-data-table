@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties } from "vue";
-import { Column, LabelField, VfField, VfType } from '@/interfaces/table';
+import { Column, LabelField, VfField, VfType, LabelStyle } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 
@@ -134,10 +134,16 @@ const mapFieldInfo = computed<{[code: string]: VfField}>(() => {
 
 const getStyleLabel = computed(() => (field: VfField): string => {
   const label = props.labels.find(label => label.code === field.vfCode)
-  const style: CSSProperties = label?.style || {}
+  const style: LabelStyle = label?.style || {}
   const styleEntries = Object.entries(style).map(([key, value]) => {
     // Chuyển đổi từ camelCase sang kebab-case
     const cssKey = key.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+    
+    // Xử lý đặc biệt cho width
+    if (key === 'width' && value !== 'auto' && style.widthUnit) {
+      return `${cssKey}: ${value}${style.widthUnit}; display: inline-block;`;
+    }
+    
     return `${cssKey}: ${value}`;
   })
   

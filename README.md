@@ -4,6 +4,54 @@ Library used for vue 3 so users can edit table columns according to their wishes
 
 ## Features
 
+- Tạo và quản lý bảng dữ liệu linh hoạt với Vue 3
+- Tùy chỉnh cột và hiển thị dữ liệu theo nhu cầu
+- Hỗ trợ nhiều loại dữ liệu: text, số, enum, action, icon
+- Tùy chỉnh template hiển thị cho từng cột
+- Hỗ trợ kéo thả để sắp xếp lại cột
+- Quản lý nhiều layout khác nhau cho cùng một bảng
+- Clone và lưu layout tùy chỉnh
+- Đặt layout mặc định
+- Giao diện người dùng thân thiện với popup chỉnh sửa
+- Hỗ trợ responsive và scroll khi cần thiết
+
+## Components
+
+### FlexiTable
+
+Component chính để hiển thị và quản lý bảng dữ liệu với các tính năng:
+
+- Chọn và chuyển đổi giữa các layout
+- Chỉnh sửa cấu trúc bảng thông qua popup
+- Clone, lưu và xóa layout
+- Đặt layout mặc định
+- Tùy chỉnh tên layout
+
+Properties
+
+| Name | Type | Require | Default | Explain |
+|:-----|:-----|:--------|:--------|:---------|
+| modelValue | string | true | - | ID của layout đang được chọn |
+| layouts | LayoutTemplate[] | true | [] | Danh sách các layout |
+| templates | VfField[] | true | [] | Các trường dữ liệu cơ bản |
+| actions | VfField[] | true | [] | Các nút hành động |
+| icons | VfField[] | true | [] | Các biểu tượng |
+| data | any[] | true | [] | Dữ liệu hiển thị |
+| height | number | false | - | Chiều cao cố định của bảng |
+| fixed | boolean | false | false | Cố định header của bảng |
+| labelPresets | LabelPreset[] | false | [] | Các preset cho nhãn |
+
+Events
+
+| Name | Parameters | Explain |
+|:-----|:-----------|:---------|
+| update:modelValue | (id: string) | Emit khi thay đổi layout |
+| onCta | (action: string, row: any, index: number) | Emit khi click vào nút hành động |
+| error | (msg: string) | Emit khi có lỗi |
+| save | (layout: LayoutTemplate, callback: () => void) | Emit khi lưu layout mới |
+| remove | (id: string, callback: () => void) | Emit khi xóa layout |
+| setDefault | (id: string, callback: () => void) | Emit khi đặt layout mặc định |
+
 ## Install
 
 Install from npm
