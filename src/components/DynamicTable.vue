@@ -1,66 +1,37 @@
 <template>
-  <div class="wrapper-table custom-scroll" :class="{fixed: fixed}" :style="{height: fixed ? `${height}px`: 'auto'}">
-    <table class="dynamic-table">
-      <thead>
-        <tr>
-          <th v-for="(column, index) in columns" 
-            :key="index" 
-            :class="{
-              'drag-over': column.isDrag,
-              'select-column': column.type === ColumnType.SELECT,
-              'sortable': column.sortField
-            }"
-            @click="handleHeaderClick(column)"
-          >
-            <template v-if="column.type === ColumnType.SELECT">
-              <input 
-                type="checkbox" 
-                :checked="selectedRows.length === (data?.length || 0)"
-                :indeterminate="selectedRows.length > 0 && selectedRows.length < (data?.length || 0)"
-                @change="toggleSelectAll"
-                @click.stop
-              />
-            </template>
-            <div v-else class="header-content">
-              {{ column.title }}
-              <span v-if="column.sortField && column.sortField === currentSortField" class="sort-icon">
-                {{ currentSortDirection === 'asc' ? '▲' : (currentSortDirection === 'desc' ? '▼' : '') }}
-              </span>
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <template v-if="(data?.length || 0) > 0">
-          <tr v-for="(row, index) in data" :key="index">
-            <td v-for="(column, index2) in columns" 
-              :key="index2" 
-              :class="{
-                'drag-over': column.isDrag,
-              }" 
-              :style="getStyleColumn(column)"
-            >
-              <template v-if="column.type === ColumnType.SELECT">
-                <input 
-                  type="checkbox" 
-                  :checked="selectedRows.includes(index)"
-                  @change="toggleSelectRow(index)"
-                />
-              </template>
-              <div v-else class="td-line" v-html="getValue(row, column, index)" />
-            </td>
-          </tr>
+  <el-table
+    ref="tableRef"
+    border
+    :data="data"
+    :height="fixed ? height : undefined"
+    style="width: 100%"
+    @sort-change="handleSortChange"
+    @selection-change="handleSelectionChange"
+  >
+    <template v-for="(column, index) in columns" :key="`${index}-${column.type}`">
+      <el-table-column
+        type="selection"
+        width="45"
+        align="center"
+        header-align="center"
+        v-if="column.type === ColumnType.SELECT"
+      />
+
+      <el-table-column
+        v-else
+        :key="index"
+        :prop="column.sortField"
+        :label="column.title"
+        :sortable="!!column.sortField"
+        :sort-orders="['ascending', 'descending', null]"
+        :sort-by="column.sortField"
+      >
+        <template #default="{ row, $index }">
+          <div v-html="getValue(row, column, $index)" />
         </template>
-        <tr v-else>
-          <td :colspan="columns.length" class="no-data">
-            <slot name="no-data">
-              Không có dữ liệu
-            </slot>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+      </el-table-column>
+    </template>
+  </el-table>
 </template>
 
 <script setup lang="ts">
@@ -69,6 +40,7 @@ import { Column, LabelField, VfField, VfType, LabelStyle, ColumnType } from '@/i
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 import DOMPurify from 'dompurify';
+import type { TableInstance } from 'element-plus';
 
 import '@/assets/style.scss';
 
@@ -76,7 +48,7 @@ interface Props {
   columns: Column[];
   templates: VfField[];
   labels: LabelField[];
-  data: any[] | undefined;
+  data: any[];
   height?: number;
   fixed: boolean;
 }
@@ -275,7 +247,7 @@ const getValue = computed(() => {
             if (fieldInfo.vfRenderFunc) {
               const vFun = fieldInfo.vfRenderFunc(row, fieldInfo, index, callFunction.value);
               const span = document.createElement("span");
-              span.classList.add('btn', `btn-${fieldInfo.vfCode}`);
+              span.classList.add('btn-link', `btn-${fieldInfo.vfCode}`);
               span.setAttribute('data-action', fieldInfo.vfCode);
               span.setAttribute('data-index', String(index));
               span.innerHTML = processHtmlContent(vFun);
@@ -287,7 +259,7 @@ const getValue = computed(() => {
               const objectRow = flattenObject.value(row);
               const value = objectRow[fieldInfo?.vfAcutalField || ''];
               const span = document.createElement("span");
-              span.classList.add('btn', `btn-${fieldInfo.vfCode}`);
+              span.classList.add('btn-link', `btn-${fieldInfo.vfCode}`);
               span.setAttribute('data-action', fieldInfo.vfCode);
               span.setAttribute('data-index', String(index));
               span.innerHTML = processHtmlContent(value || '');
@@ -296,7 +268,7 @@ const getValue = computed(() => {
             }
 
             const spanx = document.createElement("span");
-            spanx.classList.add('btn', `btn-${fieldInfo.vfCode}`);
+            spanx.classList.add('btn-link', `btn-${fieldInfo.vfCode}`);
             spanx.setAttribute('data-action', fieldInfo.vfCode);
             spanx.setAttribute('data-index', String(index));
             spanx.innerHTML = processHtmlContent(fieldInfo?.vfTitle || '');
@@ -361,118 +333,69 @@ const getValue = computed(() => {
   }
 });
 
-// Thêm state cho selected rows
-const selectedRows = ref<number[]>([]);
+const hasSelectColumn = computed(() => {
+  return props.columns.some(column => column.type === ColumnType.SELECT);
+});
 
-// Thêm state để quản lý sort direction
-const currentSortField = ref<string>();
-const currentSortDirection = ref<'asc' | 'desc'>();
-
-// Xử lý select/deselect row
-const toggleSelectRow = (index: number) => {
-  const position = selectedRows.value.indexOf(index);
-  if (position > -1) {
-    selectedRows.value.splice(position, 1);
-  } else {
-    selectedRows.value.push(index);
-  }
-  emit('selectChange', selectedRows.value);
-};
-
-// Xử lý select/deselect all
-const toggleSelectAll = () => {
-  if (selectedRows.value.length === props.data.length) {
-    selectedRows.value = [];
-  } else {
-    selectedRows.value = props.data.map((_, index) => index);
-  }
-  emit('selectChange', selectedRows.value);
-};
-
-// Thêm hàm xử lý click header
-const handleHeaderClick = (column: Column) => {
-  // Bỏ qua nếu là cột SELECT hoặc không có sortField
-  if (column.type === ColumnType.SELECT || !column.sortField) return;
-  
-  if (currentSortField.value !== column.sortField) {
-    // Nếu click column mới, reset và sort asc
-    currentSortField.value = column.sortField;
-    currentSortDirection.value = 'asc';
-  } else {
-    // Nếu click lại column đang sort
-    if (currentSortDirection.value === 'asc') {
-      currentSortDirection.value = 'desc';
-    } else if (currentSortDirection.value === 'desc') {
-      // Reset về không sort
-      currentSortField.value = undefined;
-      currentSortDirection.value = undefined;
-    } else {
-      // Từ không sort -> asc
-      currentSortDirection.value = 'asc';
-    }
-  }
-
-  // Emit sự kiện sort change
+const handleSortChange = ({ prop, order }: { prop: string; order: string }) => {
   emit('sortChange', {
-    field: currentSortField.value,
-    direction: currentSortDirection.value
+    field: prop,
+    direction: order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
   });
 };
 
-// Expose method getSelect
+const handleSelectionChange = (selection: any[]) => {
+  const selectedIndexes = selection.map(item => props.data?.indexOf(item) || -1).filter(index => index !== -1);
+  emit('selectChange', selectedIndexes);
+};
+
+const tableRef = ref<TableInstance>();
+
+// Expose methods
 defineExpose({
-  getSelect: () => selectedRows.value,
+  getSelect: () => {
+    if (!tableRef.value) return [];
+    const selection = tableRef.value.getSelectionRows();
+    return selection.map(row => props.data?.indexOf(row) || -1).filter(index => index !== -1);
+  },
   setSelect: (indexes: number[]) => {
-    selectedRows.value = indexes;
-    emit('selectChange', selectedRows.value);
+    if (!tableRef.value) return;
+    const rows = props.data?.filter((_, index) => indexes.includes(index)) || [];
+    tableRef.value.setSelectionRows(rows);
+    emit('selectChange', indexes);
   },
   clearSelect: () => {
-    selectedRows.value = [];
-    emit('selectChange', selectedRows.value);
+    if (!tableRef.value) return;
+    tableRef.value.clearSelection();
+    emit('selectChange', []);
   }
 });
 </script>
 
 <style lang="scss" scoped>
-.drag-over {
-  color: #F00;
+// .btn-link {
+//   cursor: pointer;
+//   color: #007bff;
+//   text-decoration: underline;
+//   &:hover {
+//     color: #0056b3;
+//     text-decoration: none;
+//   }
+// }
+</style>
+
+<style lang="scss">
+.btn-link {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: none;
+  &:hover {
+    color: #0056b3;
+  }
 }
 
 .icon {
-  height: 18px;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  user-select: none;
-  
-  .sort-icon {
-    font-size: 10px;
-    color: #666;
-  }
-}
-
-th {
-  position: relative;
-  
-  &.sortable {
-    cursor: pointer;
-    
-    &:hover {
-      background-color: #f5f5f5;
-    }
-  }
-  
-  input[type="checkbox"] {
-    margin: 0;
-  }
-}
-
-td {
-  input[type="checkbox"] {
-    margin: 0;
-  }
+  width: 16px;
+  height: 16px;
 }
 </style>
