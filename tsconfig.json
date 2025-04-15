@@ -29,5 +29,6 @@
     "src/App.vue",
     "src/main.ts"
   ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "types": ["vite/client"] // nếu bạn dùng Vite
 }

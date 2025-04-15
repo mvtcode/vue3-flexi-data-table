@@ -17,9 +17,9 @@
     @sortChange="onSortChange"
   >
     <template #actions>
-      <button @click="getSelect">Get Select</button>
-      <button @click="setSelect([1, 2, 3])">Set Select</button>
-      <button @click="clearSelect">Clear Select</button>
+      <el-button @click="getSelect" size="small" type="warning" plain>Get Select</el-button>
+      <el-button @click="setSelect([1, 2, 3])" size="small" type="success" plain>Set Select</el-button>
+      <el-button @click="clearSelect" size="small" type="danger" plain>Clear Select</el-button>
     </template>
   </FlexiTable>
 </template>
@@ -476,16 +476,18 @@ const defaultLayouts: LayoutTemplate[] = [
         code: 'text-01',
         title: 'Ví dụ:',
         style: {
-          'font-size': '13px',
-          color: 'red',
+          color: '#ff0000',
         },
       },
     ],
   },
 ]
 
-const layoutId = ref(defaultLayouts[0].id)
-const layouts = ref<LayoutTemplate[]>(defaultLayouts)
+// const layoutId = ref(defaultLayouts[0].id)
+const layouts = ref<LayoutTemplate[]>(defaultLayouts.map((layout: LayoutTemplate) => {
+  layout.isSystem = true;
+  return layout;
+}));
 
 const onCta = (action: string, row: any, index: number) => {
   console.log(action, row, index)
@@ -517,26 +519,41 @@ const onRemoveHandle = (id: string, cb: () => void) => {
 
 const onSetDefaultHandle = (id: string, cb: () => void) => {
   localStorage.setItem(cacheDefault, id)
-  layoutId.value = id
+  // layoutId.value = id
   cb()
 }
 
 const loadLayout = () => {
-  const cacheLayouts: LayoutTemplate[] = []
+  const cacheLayouts: LayoutTemplate[] = [];
+  let selectedLayoutId = defaultLayouts.length > 0 ? defaultLayouts[0].id : '';
 
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i) || ''
     if (key.indexOf(keyStore) >= 0) {
       const data = localStorage.getItem(key)
       if (key === cacheDefault) {
-        layoutId.value = data || ''
+        data && (selectedLayoutId = data)
       } else {
         cacheLayouts.push(JSON.parse(data || '{}'))
       }
     }
   }
 
-  layouts.value.push(...cacheLayouts)
+  layouts.value.push(...cacheLayouts.map((layout: LayoutTemplate) => {
+    layout.isSystem = false;
+    return layout;
+  }))
+
+  // if (selectedLayoutId) {
+  //   const layout = layouts.value.find((layout: LayoutTemplate) => layout.id === selectedLayoutId)
+  //   if (layout) {
+  //     layout.isDefault = true
+  //   }
+  // }
+
+  if (selectedLayoutId) {
+    flexiTableRef.value?.setDefaultLayoutId(selectedLayoutId)
+  }
 }
 
 const onSelectChange = (selectedRows: number[]) => {

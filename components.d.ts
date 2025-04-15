@@ -9,10 +9,18 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DynamicTable: typeof import('./src/components/DynamicTable.vue')['default']
+    ElButton: typeof import('element-plus/es')['ElButton']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElDivider: typeof import('element-plus/es')['ElDivider']
+    ElOption: typeof import('element-plus/es')['ElOption']
+    ElSelect: typeof import('element-plus/es')['ElSelect']
+    ElSpace: typeof import('element-plus/es')['ElSpace']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
+    ElText: typeof import('element-plus/es')['ElText']
     FlexiTable: typeof import('./src/components/FlexiTable.vue')['default']
     PopupEditLabel: typeof import('./src/components/PopupEditLabel.vue')['default']
+    PopupTableEditor: typeof import('./src/components/PopupTableEditor.vue')['default']
     TableEditor: typeof import('./src/components/TableEditor.vue')['default']
   }
 }

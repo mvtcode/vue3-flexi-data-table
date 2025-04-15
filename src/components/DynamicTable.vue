@@ -1,6 +1,7 @@
 <template>
   <el-table
     ref="tableRef"
+    class="dynamic-table"
     border
     :data="data"
     :height="fixed ? height : undefined"
@@ -11,9 +12,12 @@
     <template v-for="(column, index) in columns" :key="`${index}-${column.type}`">
       <el-table-column
         type="selection"
-        width="45"
-        align="center"
-        header-align="center"
+        :width="column.width || 45"
+        :min-width="column.minWidth"
+        :max-width="column.maxWidth"
+        :align="column.align || 'left'"
+        :header-align="column.align || 'left'"
+        :class-name="`vertical-align-${column.vAlign || 'top'}`"
         v-if="column.type === ColumnType.SELECT"
       />
 
@@ -25,6 +29,9 @@
         :sortable="!!column.sortField"
         :sort-orders="['ascending', 'descending', null]"
         :sort-by="column.sortField"
+        :align="column.align || 'left'"
+        :header-align="column.align || 'left'"
+        :class-name="`vertical-align-${column.vAlign || 'top'}`"
       >
         <template #default="{ row, $index }">
           <div v-html="getValue(row, column, $index)" />
@@ -35,14 +42,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties, defineExpose } from "vue";
+import { defineProps, computed, onMounted, ref, onBeforeUnmount } from "vue";
 import { Column, LabelField, VfField, VfType, LabelStyle, ColumnType } from '@/interfaces/table';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 import DOMPurify from 'dompurify';
 import type { TableInstance } from 'element-plus';
-
-import '@/assets/style.scss';
 
 interface Props {
   columns: Column[];
@@ -385,17 +390,31 @@ defineExpose({
 </style>
 
 <style lang="scss">
-.btn-link {
-  cursor: pointer;
-  color: #007bff;
-  text-decoration: none;
-  &:hover {
-    color: #0056b3;
+.dynamic-table.el-table {
+  .el-table__row {
+    .el-table__cell {
+      &.vertical-align-top {
+        vertical-align: top !important;
+      }
+      &.vertical-align-middle {
+        vertical-align: middle !important;
+      }
+      &.vertical-align-bottom {
+        vertical-align: bottom !important;
+      }
+    }
+    .icon {
+      width: 14px;
+      height: 14px;
+    }
+    .btn-link {
+      cursor: pointer;
+      color: #007bff;
+      text-decoration: none;
+      &:hover {
+        color: #0056b3;
+      }
+    }
   }
-}
-
-.icon {
-  width: 16px;
-  height: 16px;
 }
 </style>
