@@ -1,15 +1,8 @@
 import type { CSSProperties } from 'vue';
+import type { ColumnType, VfType } from '../enums/table.enum';
 
 export interface LabelStyle extends CSSProperties {
   widthUnit?: string;
-}
-
-export enum VfType {
-  DATA = "DATA",
-  SYMBOL = "SYMBOL",
-  ACTION = "ACTION",
-  ICON = "ICON",
-  LABEL = "LABEL",
 }
 
 export interface VfField {
@@ -50,11 +43,6 @@ export interface LayoutTemplate {
   isDefault?: boolean;
   columns: Column[];
   labels?: LabelField[];
-}
-
-export enum ColumnType {
-  DATA = 'DATA',
-  SELECT = 'SELECT'
 }
 
 export interface SortConfig {

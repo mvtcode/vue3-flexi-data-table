@@ -1,4 +1,5 @@
-import { VfField, VfType } from '@/interfaces/table';
+import { VfField } from '@/interfaces/table';
+import { VfType } from '@/enums/table.enum';
 
 export const symbols: VfField[] = [
   {

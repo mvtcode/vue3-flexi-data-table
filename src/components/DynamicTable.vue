@@ -65,7 +65,8 @@
 
 <script setup lang="ts">
 import { defineProps, computed, onMounted, ref, onBeforeUnmount, CSSProperties, defineExpose } from "vue";
-import { Column, LabelField, VfField, VfType, LabelStyle, ColumnType } from '@/interfaces/table';
+import { Column, LabelField, VfField, LabelStyle } from '@/interfaces/table';
+import { VfType, ColumnType } from '@/enums/table.enum';
 import { symbols } from '@/constants/symbols';
 import escapeHtml from 'escape-html';
 import DOMPurify from 'dompurify';

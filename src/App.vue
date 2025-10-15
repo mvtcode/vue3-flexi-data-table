@@ -27,7 +27,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, reactive } from 'vue'
 import FlexiTable from './components/FlexiTable.vue'
-import { VfField, VfType, LayoutTemplate, LabelPreset, Column, ColumnType } from './interfaces/table'
+import { VfField, LayoutTemplate, LabelPreset, Column } from './interfaces/table'
+import { VfType, ColumnType } from './enums/table.enum'
 
 const keyStore = 'flexi-layout'
 const cacheDefault = `${keyStore}.default`

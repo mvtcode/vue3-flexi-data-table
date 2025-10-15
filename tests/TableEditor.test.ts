@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, it, expect, vi } from 'vitest';
 import TableEditor from '../src/components/TableEditor.vue';
-import { ColumnType, VfType } from '../src/interfaces/table';
+import { ColumnType, VfType } from '../src/enums/table.enum';
 import { ref } from 'vue';
 
 describe('TableEditor.vue', () => {

@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import DynamicTable from '../src/components/DynamicTable.vue';
-import { ColumnType } from '../src/interfaces/table';
+import { ColumnType } from '../src/enums/table.enum';
 import { ref } from 'vue';
 
 describe('DynamicTable.vue', () => {
